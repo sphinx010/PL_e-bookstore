@@ -974,79 +974,83 @@
 }
 
 /* ── E-book dedicated section ── */
+/* Section id is swapped to #order at runtime, so target by stable classes */
+.order.ebook-only {
+  position: relative;
+  background: linear-gradient(180deg, #FCF9F3 0%, #F5EEE1 100%);
+  padding-block: clamp(72px, 9vw, 128px);
+}
 .ebook-section-layout {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   grid-template-areas:
     "copy image"
     "cta  image";
-  column-gap: 60px;
-  row-gap: 8px;
+  column-gap: clamp(40px, 6vw, 72px);
+  row-gap: 28px;
   align-items: center;
 }
-.ebook-section-copy { grid-area: copy; align-self: end; }
-.ebook-section-image { grid-area: image; }
-.ebook-section-cta { grid-area: cta; align-self: start; }
+.ebook-section-copy { grid-area: copy; align-self: end; max-width: 760px; }
+.ebook-section-image { grid-area: image; display: flex; justify-content: center; min-width: 0; }
+.ebook-section-cta { grid-area: cta; align-self: start; max-width: 760px; }
 .ebook-section-copy h2 {
-  font: 600 48px/1.06 var(--serif);
+  font: 600 clamp(34px, 3.4vw, 48px)/1.06 var(--serif);
   color: var(--navy);
-  margin: 8px 0 16px;
+  margin: 8px 0 0;
+  text-wrap: balance;
 }
 .ebook-description {
+  max-width: 760px;
   font-size: 18px;
-  line-height: 1.6;
+  line-height: 1.55;
   color: #35495B;
-  margin-bottom: 24px;
+  margin: 1.25rem 0 0;
+  text-wrap: pretty;
 }
 .ebook-benefits {
   list-style: none;
-  margin: 24px 0;
   padding: 0;
+  margin: 2.5rem 0 0;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 24px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: clamp(40px, 7vw, 96px);
+  row-gap: 24px;
+  max-width: 880px;
 }
 .ebook-benefits li {
   font: 600 14px/1.4 var(--sans);
   color: var(--navy);
   position: relative;
-  padding-left: 20px;
+  padding-left: 26px;
 }
 .ebook-benefits li::before {
-  content: "◆";
+  content: "✓";
   color: var(--gold);
-  font-size: 10px;
+  font: 700 13px/1 var(--sans);
   position: absolute;
   left: 0;
-  top: 2px;
+  top: 1px;
 }
+/* Purchase row — price + CTA as one conversion unit */
 .ebook-price-cta {
   display: flex;
   align-items: center;
-  gap: 24px;
-  margin-top: 28px;
+  gap: clamp(24px, 4vw, 56px);
+  flex-wrap: wrap;
+  margin-top: 0;
 }
 .ebook-price-display {
-  font: 700 42px/1 var(--serif);
+  font: 700 clamp(36px, 3vw, 44px)/1 var(--serif);
   color: var(--gold);
   letter-spacing: -.01em;
 }
 .ebook-price-cta .order-btn {
   max-width: none;
   width: auto;
-  height: 56px;
-  padding: 0 40px;
+  min-height: 58px;
+  height: auto;
+  padding: 0 44px;
   letter-spacing: .11em;
-}
-.ebook-microcopy {
-  font-size: 13px;
-  color: #8A96A3;
-  margin-top: 14px;
-  letter-spacing: .01em;
-}
-.ebook-section-image {
-  display: flex;
-  justify-content: center;
 }
 .ebook-section-image img {
   max-width: 100%;
@@ -1072,29 +1076,29 @@
     row-gap: 32px;
   }
   .ebook-section-copy,
-  .ebook-section-cta { align-self: auto; }
-  .ebook-section-copy h2 {
-    font-size: 38px;
+  .ebook-section-cta {
+    align-self: auto;
+    max-width: 100%;
   }
   .ebook-benefits {
     grid-template-columns: 1fr;
-    gap: 8px;
+    column-gap: 0;
+    row-gap: 18px;
+    margin-top: 2rem;
   }
+}
+
+@media(max-width: 640px) {
   .ebook-price-cta {
     flex-direction: column;
     align-items: stretch;
-    gap: 14px;
-    margin-top: 0;
+    gap: 16px;
   }
   .ebook-price-display {
     text-align: center;
   }
   .ebook-price-cta .order-btn {
-    max-width: 100%;
     width: 100%;
-  }
-  .ebook-microcopy {
-    text-align: center;
   }
 }
 
@@ -1207,3 +1211,18 @@
 /* Book-link hover: gold color */
 .book-link:hover { color: var(--gold); }
 .book-link:hover span { opacity: 1; }
+
+/* ── Hero CTAs: taller presence, label + arrow optically centered ──
+   Uses min-height + flex centering on the button itself (no top margins,
+   transforms or positional offsets). Both buttons share one height. */
+.hero-actions .button {
+  min-height: 56px;
+  height: auto;
+  padding-block: 0;
+  line-height: 1;
+}
+.hero-actions .button > span {
+  position: static;
+  top: auto;
+  margin: 0;
+}
