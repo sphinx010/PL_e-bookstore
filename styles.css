@@ -977,86 +977,147 @@
 /* Section id is swapped to #order at runtime, so target by stable classes */
 .order.ebook-only {
   position: relative;
-  background: linear-gradient(180deg, #FCF9F3 0%, #F5EEE1 100%);
-  padding-block: clamp(72px, 9vw, 128px);
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(252,249,243,.98) 0%, rgba(252,249,243,.9) 42%, rgba(245,238,225,.72) 100%),
+    linear-gradient(180deg, #FCF9F3 0%, #F5EEE1 100%);
+  padding-block: clamp(62px, 6.4vw, 98px);
+}
+.order.ebook-only::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(184,138,67,.36), transparent);
+  pointer-events: none;
 }
 .ebook-section-layout {
+  position: relative;
+  z-index: 1;
+  width: min(1380px, calc(100% - 56px));
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-columns: minmax(360px, .76fr) minmax(640px, 1.24fr);
   grid-template-areas:
     "copy image"
     "cta  image";
-  column-gap: clamp(40px, 6vw, 72px);
-  row-gap: 28px;
+  column-gap: clamp(28px, 4.6vw, 68px);
+  row-gap: 20px;
   align-items: center;
 }
-.ebook-section-copy { grid-area: copy; align-self: end; max-width: 760px; }
-.ebook-section-image { grid-area: image; display: flex; justify-content: center; min-width: 0; }
-.ebook-section-cta { grid-area: cta; align-self: start; max-width: 760px; }
+.ebook-section-copy {
+  grid-area: copy;
+  align-self: end;
+  max-width: 590px;
+}
+.ebook-section-image {
+  grid-area: image;
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+  margin-right: clamp(-56px, -3vw, -20px);
+}
+.ebook-section-cta {
+  grid-area: cta;
+  align-self: start;
+  max-width: 590px;
+}
 .ebook-section-copy h2 {
-  font: 600 clamp(34px, 3.4vw, 48px)/1.06 var(--serif);
+  font: 600 clamp(42px, 4.05vw, 62px)/.97 var(--serif);
   color: var(--navy);
-  margin: 8px 0 0;
+  letter-spacing: -.018em;
+  margin: 12px 0 0;
   text-wrap: balance;
 }
 .ebook-description {
-  max-width: 760px;
-  font-size: 18px;
-  line-height: 1.55;
+  max-width: 560px;
+  font-size: clamp(18px, 1.3vw, 20px);
+  line-height: 1.46;
   color: #35495B;
-  margin: 1.25rem 0 0;
+  margin: 18px 0 0;
   text-wrap: pretty;
 }
 .ebook-benefits {
   list-style: none;
   padding: 0;
-  margin: 2.5rem 0 0;
+  margin: 24px 0 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: clamp(40px, 7vw, 96px);
-  row-gap: 24px;
-  max-width: 880px;
+  grid-template-columns: repeat(2, minmax(190px, 1fr));
+  gap: 12px 18px;
+  max-width: 620px;
 }
 .ebook-benefits li {
-  font: 600 14px/1.4 var(--sans);
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  font: 700 14px/1.2 var(--sans);
   color: var(--navy);
   position: relative;
-  padding-left: 26px;
+  padding-left: 0;
 }
 .ebook-benefits li::before {
   content: "✓";
   color: var(--gold);
   font: 700 13px/1 var(--sans);
-  position: absolute;
-  left: 0;
-  top: 1px;
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  margin-right: 12px;
+  border: 1px solid rgba(184,138,67,.46);
+  border-radius: 50%;
+  background: rgba(252,249,243,.72);
 }
 /* Purchase row — price + CTA as one conversion unit */
 .ebook-price-cta {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(260px, 332px);
   align-items: center;
-  gap: clamp(24px, 4vw, 56px);
-  flex-wrap: wrap;
+  gap: 22px 28px;
   margin-top: 0;
+  padding-top: 24px;
+  border-top: 1px solid rgba(184,138,67,.24);
 }
 .ebook-price-display {
-  font: 700 clamp(36px, 3vw, 44px)/1 var(--serif);
+  font: 700 clamp(46px, 4.7vw, 64px)/.9 var(--serif);
   color: var(--gold);
-  letter-spacing: -.01em;
+  letter-spacing: -.02em;
+}
+.ebook-cta-stack {
+  display: grid;
+  gap: 10px;
 }
 .ebook-price-cta .order-btn {
   max-width: none;
-  width: auto;
-  min-height: 58px;
-  height: auto;
-  padding: 0 44px;
+  width: 100%;
+  min-height: 62px;
+  height: 62px;
+  padding: 0 32px;
   letter-spacing: .11em;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+}
+.ebook-secure-note {
+  display: block;
+  font: 700 10px/1.35 var(--sans);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(16,40,63,.68);
 }
 .ebook-section-image img {
-  max-width: 100%;
+  width: clamp(720px, 58vw, 1040px);
+  max-width: none;
+  aspect-ratio: 1200 / 630;
   height: auto;
+  object-fit: cover;
+  object-position: center;
   border-radius: 0;
-  box-shadow: 0 32px 80px rgba(9,27,44,.13), 0 8px 22px rgba(9,27,44,.07);
+  box-shadow: 0 34px 86px rgba(9,27,44,.16), 0 10px 24px rgba(9,27,44,.08);
 }
 
 .no-hardcopy .mobile-buy a.physical-only {
@@ -1066,33 +1127,71 @@
   grid-template-columns: 1fr !important;
 }
 
-@media(max-width: 760px) {
+@media(max-width: 1100px) {
   .ebook-section-layout {
+    width: min(1200px, calc(100% - 44px));
+    grid-template-columns: minmax(330px, .84fr) minmax(480px, 1.16fr);
+    column-gap: 34px;
+  }
+  .ebook-section-image {
+    margin-right: -28px;
+  }
+  .ebook-section-image img {
+    width: clamp(560px, 60vw, 780px);
+  }
+}
+
+@media(max-width: 760px) {
+  .order.ebook-only {
+    padding-block: 68px 76px;
+  }
+  .ebook-section-layout {
+    width: calc(100% - 32px);
     grid-template-columns: 1fr;
     grid-template-areas:
       "copy"
       "image"
       "cta";
-    row-gap: 32px;
+    row-gap: 30px;
   }
   .ebook-section-copy,
   .ebook-section-cta {
     align-self: auto;
     max-width: 100%;
   }
+  .ebook-section-copy {
+    text-align: center;
+    margin-inline: auto;
+  }
+  .ebook-section-copy h2 {
+    font-size: clamp(36px, 10vw, 48px);
+  }
+  .ebook-description {
+    margin-inline: auto;
+  }
+  .ebook-section-image {
+    justify-content: center;
+    margin-right: 0;
+  }
+  .ebook-section-image img {
+    width: min(100%, 620px);
+    max-width: 100%;
+  }
   .ebook-benefits {
     grid-template-columns: 1fr;
     column-gap: 0;
-    row-gap: 18px;
-    margin-top: 2rem;
+    row-gap: 12px;
+    margin-top: 26px;
+    text-align: left;
   }
 }
 
 @media(max-width: 640px) {
   .ebook-price-cta {
-    flex-direction: column;
+    grid-template-columns: 1fr;
     align-items: stretch;
-    gap: 16px;
+    gap: 18px;
+    padding-top: 24px;
   }
   .ebook-price-display {
     text-align: center;
