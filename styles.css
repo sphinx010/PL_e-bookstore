@@ -1212,17 +1212,96 @@
 .book-link:hover { color: var(--gold); }
 .book-link:hover span { opacity: 1; }
 
-/* ── Hero CTAs: taller presence, label + arrow optically centered ──
-   Uses min-height + flex centering on the button itself (no top margins,
-   transforms or positional offsets). Both buttons share one height. */
-.hero-actions .button {
-  min-height: 56px;
-  height: auto;
-  padding-block: 0;
-  line-height: 1;
+/* Hero CTAs: centre the real clickable anchor, not only its wrapper. */
+@media (min-width: 761px) {
+  .hero.hero-full .hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    width: min(calc(100vw - 64px), 588px);
+    gap: 20px;
+  }
 }
-.hero-actions .button > span {
+
+.hero-actions .hero-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 62px;
+  height: 62px;
+  padding: 0 28px;
+  gap: 10px;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.no-hardcopy .hero-actions .hero-button.ebook-only {
+  display: inline-flex !important;
+}
+
+.hero-actions .hero-button > span,
+.hero-actions .hero-button > svg,
+.hero-actions .hero-button .button-label,
+.hero-actions .hero-button .button-arrow {
+  margin: 0;
+  padding: 0;
   position: static;
   top: auto;
+  bottom: auto;
+  transform: none;
+  line-height: 1;
+  align-self: center;
+}
+
+.hero-button__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   margin: 0;
+  padding: 0;
+  line-height: 1;
+  font: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+.hero-actions .hero-button .button-label {
+  font: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  opacity: 1;
+}
+
+.hero-actions .hero-button .button-arrow {
+  font-size: 13px;
+  font-weight: 400;
+  opacity: .85;
+}
+
+.hero-actions .hero-button:hover,
+.hero-actions .hero-button:focus-visible,
+.hero-actions .hero-button:active {
+  transform: none;
+}
+
+.hero-actions .hero-button:hover > span,
+.hero-actions .hero-button:hover .button-label,
+.hero-actions .hero-button:hover .button-arrow {
+  transform: none;
+}
+
+@media (max-width: 760px) {
+  .hero.hero-full .hero-actions {
+    gap: 12px;
+  }
+
+  .hero.hero-full .hero-actions .hero-button {
+    width: 100%;
+  }
 }

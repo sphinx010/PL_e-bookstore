@@ -86,6 +86,41 @@ const ebookProduct = {
 let _products = [];
 let _selectedProductCode = null;
 
+function setButtonContent(button, label) {
+  if (!button) return;
+
+  if (!button.classList.contains('hero-button')) {
+    button.innerHTML = `${label} <span>→</span>`;
+    return;
+  }
+
+  let content = button.querySelector('.hero-button__content');
+  if (!content) {
+    button.textContent = '';
+    content = document.createElement('span');
+    content.className = 'hero-button__content';
+    button.append(content);
+  }
+
+  let labelEl = content.querySelector('.button-label');
+  if (!labelEl) {
+    labelEl = document.createElement('span');
+    labelEl.className = 'button-label';
+    content.prepend(labelEl);
+  }
+
+  let arrowEl = content.querySelector('.button-arrow');
+  if (!arrowEl) {
+    arrowEl = document.createElement('span');
+    arrowEl.className = 'button-arrow';
+    arrowEl.setAttribute('aria-hidden', 'true');
+    content.append(arrowEl);
+  }
+
+  labelEl.textContent = label;
+  arrowEl.textContent = '→';
+}
+
 /**
  * Initialize layout and pricing statically using default configuration.
  * Prevents layout flash / CLS before API response is loaded.
@@ -112,7 +147,7 @@ function initStaticPricing() {
   if (heroPrimaryEbook) {
     heroPrimaryEbook.dataset.productCode = 'PURPOSEFUL_LIVING_EBOOK';
     heroPrimaryEbook.dataset.mode = 'order';
-    heroPrimaryEbook.innerHTML = `Buy the E-book <span>→</span>`;
+    setButtonContent(heroPrimaryEbook, 'Buy the E-book');
   }
 
   // Mobile buy e-book price
@@ -165,15 +200,15 @@ function updateSignedCopyControls(product) {
   const heroPrimary = document.querySelector('.hero-actions .button.primary');
   if (heroPrimary) {
     if (mode === 'AVAILABLE') {
-      heroPrimary.innerHTML = `Order the Signed Copy <span>→</span>`;
+      setButtonContent(heroPrimary, 'Order the Signed Copy');
       heroPrimary.dataset.productCode = product.code;
       heroPrimary.dataset.mode = 'order';
     } else if (mode === 'WAITLIST') {
-      heroPrimary.innerHTML = `Join the Waitlist <span>→</span>`;
+      setButtonContent(heroPrimary, 'Join the Waitlist');
       heroPrimary.dataset.productCode = product.code;
       heroPrimary.dataset.mode = 'waitlist';
     } else {
-      heroPrimary.innerHTML = `Sold Out <span>→</span>`;
+      setButtonContent(heroPrimary, 'Sold Out');
       heroPrimary.dataset.mode = 'soldout';
     }
   }
@@ -245,7 +280,7 @@ function updateEbookControls(product) {
   if (heroPrimaryEbook) {
     heroPrimaryEbook.dataset.productCode = product.code;
     heroPrimaryEbook.dataset.mode = 'order';
-    heroPrimaryEbook.innerHTML = `Buy the E-book <span>→</span>`;
+    setButtonContent(heroPrimaryEbook, 'Buy the E-book');
   }
 
   // Mobile sticky bar e-book price
