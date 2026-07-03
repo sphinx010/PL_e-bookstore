@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Order Management — Purposeful Living</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    :root{--navy:#10283F;--gold:#B88A43;--ivory:#F7F1E7;--mid:#091B2C;--cream:#FCF9F3;--sans:Inter,Arial,sans-serif}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--sans);background:#f0f4f8;color:#1a202c;font-size:14px;min-height:100vh}
+    #login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--navy)}
+    .login-card{background:var(--cream);padding:48px 40px;width:100%;max-width:380px}
+    .login-brand{font-size:16px;font-weight:700;color:var(--navy);letter-spacing:.02em;margin-bottom:32px}
+    .login-brand span{color:var(--gold)}
+    .login-card h1{font-size:22px;color:var(--navy);margin-bottom:24px}
+    .field{margin-bottom:16px}
+    .field label{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);font-weight:700;margin-bottom:6px}
+    .field input{width:100%;padding:11px;border:1px solid rgba(16,40,63,.18);font-size:14px;font-family:inherit}
+    .btn{width:100%;padding:13px;background:var(--mid);color:#fff;border:none;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;cursor:pointer;font-family:inherit}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-small{padding:7px 16px;font-size:9px;background:var(--navy);color:#fff;border:none;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;font-weight:700;font-family:inherit}
+    .btn-gold{background:var(--gold);color:var(--mid)}
+    #app{display:none;flex-direction:column;min-height:100vh}
+    .topbar{background:var(--navy);color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .topbar-brand{font-size:14px;font-weight:700;letter-spacing:.06em}
+    .topbar-brand span{color:var(--gold)}
+    .topbar-actions{display:flex;align-items:center;gap:16px;font-size:11px;color:rgba(255,255,255,.7)}
+    .main{flex:1;padding:28px;max-width:1400px;margin:0 auto;width:100%}
+    h2{font-size:18px;color:var(--navy);margin-bottom:20px;font-weight:700}
+    .filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:flex-end}
+    .filters input,.filters select{padding:8px 12px;border:1px solid #e2e8f0;font-size:13px;font-family:inherit;background:#fff;min-width:160px}
+    .count{font-size:13px;color:#718096;margin-bottom:12px}
+    .table-wrap{overflow-x:auto;background:#fff;border:1px solid #e2e8f0}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{background:#f7fafc;text-align:left;padding:11px 14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#4a5568;font-weight:700;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+    td{padding:11px 14px;border-bottom:1px solid #f0f4f8;vertical-align:top}
+    tr:last-child td{border-bottom:0}
+    tr:hover td{background:#f7fafc}
+    .badge{display:inline-block;padding:3px 9px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;border-radius:2px}
+    .badge-paid{background:#c6f6d5;color:#22543d}
+    .badge-pending{background:#fefcbf;color:#744210}
+    .badge-failed{background:#fed7d7;color:#822727}
+    .badge-default{background:#e2e8f0;color:#4a5568}
+    .pagination{display:flex;align-items:center;gap:12px;margin-top:16px;font-size:13px}
+    .modal-overlay{position:fixed;inset:0;background:rgba(9,27,44,.6);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;max-width:720px;width:100%;max-height:90vh;overflow-y:auto;padding:36px}
+    .modal h3{font-size:18px;color:var(--navy);margin-bottom:20px}
+    .detail-row{display:grid;grid-template-columns:160px 1fr;gap:4px;padding:8px 0;border-bottom:1px solid #f0f4f8;font-size:13px}
+    .detail-label{color:#718096;font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding-top:2px}
+    .history-item{padding:10px 0;border-bottom:1px solid #f0f4f8;font-size:12px}
+    .history-item:last-child{border-bottom:0}
+    .update-form{margin-top:24px;padding-top:24px;border-top:1px solid #e2e8f0}
+    .update-form label{display:block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--navy);margin-bottom:6px}
+    .update-form select,.update-form textarea{width:100%;padding:9px;border:1px solid #e2e8f0;font-size:13px;font-family:inherit;margin-bottom:12px}
+    #error-msg{color:#c53030;font-size:13px;margin-top:10px;display:none}
+    .export-btn{margin-left:auto}
+  </style>
+</head>
+<body>
+
+<!-- Login screen -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">PURPOSEFUL<span>LIVING</span></div>
+    <h1>Admin sign in</h1>
+    <form id="login-form">
+      <div class="field"><label>Email</label><input type="email" id="login-email" required autocomplete="username"></div>
+      <div class="field"><label>Password</label><input type="password" id="login-password" required autocomplete="current-password"></div>
+      <div id="error-msg"></div>
+      <br>
+      <button class="btn" type="submit" id="login-btn">Sign in</button>
+    </form>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">PURPOSEFUL<span>LIVING</span> — Orders</div>
+    <div class="topbar-actions">
+      <span id="admin-email-display"></span>
+      <button class="btn-small" id="sign-out-btn">Sign out</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <h2>Order Management</h2>
+
+    <div class="filters">
+      <input type="text" id="filter-search" placeholder="Search name, email, reference…">
+      <select id="filter-payment">
+        <option value="">All payment statuses</option>
+        <option>PENDING</option><option>INITIALISED</option><option>PAID</option>
+        <option>FAILED</option><option>REFUNDED</option><option>CANCELLED</option>
+      </select>
+      <select id="filter-fulfilment">
+        <option value="">All fulfilment statuses</option>
+        <option>AWAITING_PAYMENT</option><option>AWAITING_INSCRIPTION</option>
+        <option>SIGNED</option><option>PACKAGED</option><option>DISPATCHED</option>
+        <option>DELIVERED</option><option>ACCESS_PENDING</option>
+        <option>ACCESS_ISSUED</option><option>ACCESS_REVOKED</option><option>CANCELLED</option>
+      </select>
+      <input type="date" id="filter-from" placeholder="From date">
+      <input type="date" id="filter-to" placeholder="To date">
+      <button class="btn-small" id="search-btn">Filter</button>
+      <button class="btn-small export-btn" id="export-btn">Export CSV</button>
+    </div>
+
+    <div class="count" id="count-label"></div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Reference</th><th>Customer</th><th>Email</th>
+            <th>Product</th><th>Amount</th>
+            <th>Payment</th><th>Fulfilment</th><th>Date</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="orders-body"></tbody>
+      </table>
+    </div>
+    <div class="pagination">
+      <button class="btn-small" id="prev-btn">← Prev</button>
+      <span id="page-label">Page 1</span>
+      <button class="btn-small" id="next-btn">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order detail modal -->
+<div class="modal-overlay" id="order-modal">
+  <div class="modal" id="modal-content">
+    <button style="float:right;background:none;border:none;font-size:24px;cursor:pointer;color:#718096" id="close-modal">×</button>
+    <h3 id="modal-title">Order Detail</h3>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+  // ── Supabase client (anon key — auth only, API calls use the session JWT) ──
+  let SUPABASE_URL = 'REPLACE_WITH_SUPABASE_URL';
+  let SUPABASE_ANON_KEY = 'REPLACE_WITH_SUPABASE_ANON_KEY';
+  let sb = null;
+
+  let session = null;
+  let currentPage = 1;
+  let totalOrders = 0;
+  const PER_PAGE = 50;
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  async function init() {
+    try {
+      const configRes = await fetch('/api/config');
+      if (configRes.ok) {
+        const cfg = await configRes.json();
+        SUPABASE_URL = cfg.SUPABASE_URL || SUPABASE_URL;
+        SUPABASE_ANON_KEY = cfg.SUPABASE_ANON_KEY || SUPABASE_ANON_KEY;
+      }
+    } catch (e) {
+      console.warn('Failed to load dynamic Supabase config, using build-time placeholders', e);
+    }
+
+    const { createClient } = window.supabase;
+    sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const { data } = await sb.auth.getSession();
+    session = data.session;
+    if (session) showApp();
+    else showLogin();
+  }
+
+  function showLogin() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('admin-email-display').textContent = session?.user?.email ?? '';
+    loadOrders();
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('login-btn');
+    const errEl = document.getElementById('error-msg');
+    btn.disabled = true;
+    errEl.style.display = 'none';
+
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+    if (error || !data.session) {
+      errEl.textContent = error?.message ?? 'Sign in failed.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      return;
+    }
+    session = data.session;
+    showApp();
+  });
+
+  document.getElementById('sign-out-btn').addEventListener('click', async () => {
+    await sb.auth.signOut();
+    session = null;
+    showLogin();
+  });
+
+  // ── API helper ─────────────────────────────────────────────────────────────
+  async function api(path, opts = {}) {
+    const res = await fetch(path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.access_token}`,
+        ...(opts.headers ?? {}),
+      },
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.error?.message ?? `Request failed: ${res.status}`);
+    }
+    return res.json();
+  }
+
+  // ── Orders list ───────────────────────────────────────────────────────────
+  async function loadOrders() {
+    const params = new URLSearchParams();
+    const search = document.getElementById('filter-search').value.trim();
+    const payment = document.getElementById('filter-payment').value;
+    const fulfil = document.getElementById('filter-fulfilment').value;
+    const from = document.getElementById('filter-from').value;
+    const to = document.getElementById('filter-to').value;
+
+    if (search) params.set('search', search);
+    if (payment) params.set('payment_status', payment);
+    if (fulfil) params.set('fulfilment_status', fulfil);
+    if (from) params.set('from_date', from);
+    if (to) params.set('to_date', to);
+    params.set('page', String(currentPage));
+    params.set('per_page', String(PER_PAGE));
+
+    try {
+      const { orders, total } = await api(`/api/admin/orders?${params}`);
+      totalOrders = total;
+      renderOrders(orders);
+      document.getElementById('count-label').textContent = `${total} order${total === 1 ? '' : 's'}`;
+      document.getElementById('page-label').textContent = `Page ${currentPage} of ${Math.max(1, Math.ceil(total / PER_PAGE))}`;
+    } catch (err) {
+      document.getElementById('orders-body').innerHTML = `<tr><td colspan="9" style="color:#c53030;padding:20px">${err.message}</td></tr>`;
+    }
+  }
+
+  function badgeClass(status) {
+    if (['PAID', 'DELIVERED', 'ACCESS_ISSUED'].includes(status)) return 'badge-paid';
+    if (['PENDING', 'INITIALISED', 'AWAITING_PAYMENT', 'AWAITING_INSCRIPTION'].includes(status)) return 'badge-pending';
+    if (['FAILED', 'CANCELLED'].includes(status)) return 'badge-failed';
+    return 'badge-default';
+  }
+
+  function renderOrders(orders) {
+    const tbody = document.getElementById('orders-body');
+    if (!orders.length) {
+      tbody.innerHTML = '<tr><td colspan="9" style="padding:20px;color:#718096">No orders found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = orders.map(o => `
+      <tr>
+        <td style="font-family:monospace;font-size:12px">${o.order_reference}</td>
+        <td>${esc(o.customer_name)}</td>
+        <td style="font-size:12px">${esc(o.email)}</td>
+        <td style="font-size:12px">${esc(o.products?.code ?? '')}</td>
+        <td>₦${(o.total_amount_kobo/100).toLocaleString('en-NG')}</td>
+        <td><span class="badge ${badgeClass(o.payment_status)}">${o.payment_status}</span></td>
+        <td><span class="badge ${badgeClass(o.fulfilment_status)}">${o.fulfilment_status}</span></td>
+        <td style="font-size:12px;white-space:nowrap">${new Date(o.created_at).toLocaleDateString('en-GB')}</td>
+        <td><button class="btn-small" onclick="openOrder('${o.order_reference}')">View</button></td>
+      </tr>
+    `).join('');
+  }
+
+  document.getElementById('search-btn').addEventListener('click', () => { currentPage = 1; loadOrders(); });
+  document.getElementById('prev-btn').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadOrders(); } });
+  document.getElementById('next-btn').addEventListener('click', () => { if (currentPage * PER_PAGE < totalOrders) { currentPage++; loadOrders(); } });
+  document.getElementById('filter-search').addEventListener('keydown', e => { if (e.key === 'Enter') { currentPage = 1; loadOrders(); } });
+
+  // ── CSV Export ──────────────────────────────────────────────────────────
+  document.getElementById('export-btn').addEventListener('click', async () => {
+    const { orders } = await api('/api/admin/orders?payment_status=PAID&per_page=200').catch(() => ({ orders: [] }));
+    if (!orders.length) return alert('No paid orders to export.');
+    const cols = ['order_reference','customer_name','email','phone','fulfilment_status','total_amount_kobo','delivery_address','delivery_state','recipient_name','inscription_request','paid_at'];
+    const csv = [cols.join(','), ...orders.map(o => cols.map(c => `"${String(o[c]??'').replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'orders.csv'; a.click();
+  });
+
+  // ── Order detail ──────────────────────────────────────────────────────────
+  async function openOrder(reference) {
+    const modal = document.getElementById('order-modal');
+    document.getElementById('modal-body').innerHTML = '<p style="padding:20px;color:#718096">Loading…</p>';
+    modal.classList.add('open');
+
+    try {
+      const { order, history, entitlement } = await api(`/api/admin/${reference}`);
+      document.getElementById('modal-title').textContent = `Order — ${reference}`;
+      renderOrderDetail(order, history, entitlement);
+    } catch (err) {
+      document.getElementById('modal-body').innerHTML = `<p style="color:#c53030">${err.message}</p>`;
+    }
+  }
+
+  function renderOrderDetail(order, history, entitlement) {
+    const fields = [
+      ['Reference', order.order_reference],
+      ['Customer', order.customer_name],
+      ['Email', order.email],
+      ['Phone', order.phone],
+      ['Payment', order.payment_status],
+      ['Fulfilment', order.fulfilment_status],
+      ['Amount', `₦${(order.total_amount_kobo/100).toLocaleString('en-NG')}`],
+      ['Paid at', order.paid_at ? new Date(order.paid_at).toLocaleString('en-GB') : '—'],
+      ['Address', [order.delivery_address, order.delivery_state].filter(Boolean).join(', ') || '—'],
+      ['Recipient', order.recipient_name || '—'],
+      ['Inscription', order.inscription_request || '—'],
+    ];
+
+    const historyHtml = history.map(h => `
+      <div class="history-item">
+        <strong>${h.previous_status} → ${h.new_status}</strong>
+        <span style="color:#718096;margin-left:8px">${new Date(h.created_at).toLocaleString('en-GB')}</span>
+        <span style="color:#4a5568;margin-left:8px">by ${esc(h.created_by)}</span>
+        ${h.note ? `<div style="color:#4a5568;margin-top:3px">${esc(h.note)}</div>` : ''}
+      </div>
+    `).join('') || '<p style="color:#718096;font-size:13px">No history.</p>';
+
+    const PHYSICAL_OPTIONS = ['AWAITING_INSCRIPTION','SIGNED','PACKAGED','DISPATCHED','DELIVERED','CANCELLED'];
+    const EBOOK_OPTIONS = ['ACCESS_ISSUED','ACCESS_REVOKED'];
+    const options = order.fulfilment_status.startsWith('ACCESS') || order.fulfilment_status === 'ACCESS_PENDING'
+      ? EBOOK_OPTIONS : PHYSICAL_OPTIONS;
+
+    document.getElementById('modal-body').innerHTML = `
+      ${fields.map(([l,v]) => `<div class="detail-row"><div class="detail-label">${l}</div><div>${esc(String(v))}</div></div>`).join('')}
+      ${entitlement ? `<div class="detail-row"><div class="detail-label">Downloads</div><div>${entitlement.downloadCount} / ${entitlement.maximumDownloads}${entitlement.revokedAt ? ' (revoked)' : ''}</div></div>` : ''}
+      <div style="margin-top:24px"><h3 style="font-size:14px;margin-bottom:12px">Fulfilment history</h3>${historyHtml}</div>
+      <div class="update-form">
+        <label>Update fulfilment status</label>
+        <select id="new-status">
+          ${options.map(s => `<option value="${s}">${s}</option>`).join('')}
+        </select>
+        <label>Note (optional)</label>
+        <textarea id="update-note" rows="2" placeholder="Internal note…"></textarea>
+        <button class="btn-small btn-gold" id="update-btn" onclick="updateStatus('${order.order_reference}')">Update status</button>
+        <span id="update-msg" style="margin-left:12px;font-size:12px"></span>
+      </div>
+    `;
+  }
+
+  async function updateStatus(reference) {
+    const status = document.getElementById('new-status').value;
+    const note = document.getElementById('update-note').value.trim();
+    const msgEl = document.getElementById('update-msg');
+    try {
+      await api(`/api/admin/${reference}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ fulfilmentStatus: status, note: note || undefined }),
+      });
+      msgEl.style.color = '#22543d';
+      msgEl.textContent = 'Updated.';
+      loadOrders();
+    } catch (err) {
+      msgEl.style.color = '#c53030';
+      msgEl.textContent = err.message;
+    }
+  }
+
+  document.getElementById('close-modal').addEventListener('click', () => {
+    document.getElementById('order-modal').classList.remove('open');
+  });
+  document.getElementById('order-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('order-modal')) {
+      document.getElementById('order-modal').classList.remove('open');
+    }
+  });
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  init();
+</script>
+</body>
+</html>

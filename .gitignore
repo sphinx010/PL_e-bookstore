@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Environment variables — NEVER commit real values
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.production
+.env.*.local
+# keep .env.example tracked (it has no real secrets)
+
+# Claude Code tooling (local assistant memory — not project code)
+.claude/
+
+# Vercel — only the project link file belongs in git
+# DO commit: .vercel/project.json  (project ID + org ID for CLI linking)
+.vercel/output/
+.vercel/README.txt
+.vercel/node/
+
+# TypeScript build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# OS & editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <title>Purposeful Living Web Utility</title>
+  
+  
+<rect x="118" y="54" width="276" height="404" rx="28" stroke="#10283F" stroke-width="12"/>
+<circle cx="256" cy="420" r="10" fill="#B88A43"/>
+<path d="M166 154C205 136 229 143 256 164C283 143 307 136 346 154V320C307 303 283 310 256 331C229 310 205 303 166 320Z"
+      stroke="#B88A43" stroke-width="8" stroke-linejoin="round"/>
+<path d="M256 164V331" stroke="#B88A43" stroke-width="6"/>
+<path d="M184 188C207 181 224 184 241 196M184 222C208 215 225 218 241 229M328 188C305 181 288 184 271 196M328 222C304 215 287 218 271 229"
+      stroke="#10283F" stroke-width="5" stroke-linecap="round"/>
+
+</svg>

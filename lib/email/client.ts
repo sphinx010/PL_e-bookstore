@@ -1,0 +1,36 @@
+import { Resend } from 'resend';
+import { config } from '../config';
+import { logger } from '../logger';
+
+// PENDING: Replace with verified Resend sending domain before go-live
+const resend = new Resend(config.RESEND_API_KEY);
+
+export interface EmailPayload {
+  to: string;
+  subject: string;
+  html: string;
+}
+
+export async function sendEmail(payload: EmailPayload): Promise<void> {
+  try {
+    const { error } = await resend.emails.send({
+      from: config.RESEND_FROM,
+      to: payload.to,
+      subject: payload.subject,
+      html: payload.html,
+    });
+
+    if (error) {
+      logger.error('Email send failed', { to: payload.to, subject: payload.subject, error: error.message });
+      return;
+    }
+
+    logger.info('Email sent', { to: payload.to, subject: payload.subject });
+  } catch (err) {
+    logger.error('Email exception', {
+      to: payload.to,
+      subject: payload.subject,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+}

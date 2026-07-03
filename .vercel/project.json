@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_qw4HrtN1RQ3455KVwVXvZpUBII71",
+  "orgId": "team_H9kiPmC6MWLPxjX5mpUFeX5k",
+  "projectName": "purposeful-living-final",
+  "settings": {
+    "createdAt": 1782757909657,
+    "framework": null,
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

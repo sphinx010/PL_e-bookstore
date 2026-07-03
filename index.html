@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#091B2C">
+  <meta name="description"
+    content="Discover your divine direction and begin living with greater meaning. Get the Purposeful Living e-book for 5,000.">
+  <meta name="keywords" content="Purposeful Living, Samuel Victor Obembe, Pastor Samuel Victor Obembe, Christian book purpose, divine assignment, spiritual growth, No More Barrenness, Redeemed Christian Church of God, RCCG Pastor">
+  <meta name="author" content="Samuel Victor Obembe">
+  <meta name="robots" content="index, follow">
+  <title>Purposeful Living — Samuel Victor Obembe | Discover Your Divine Direction</title>
+  
+  <!-- Canonical Tag -->
+  <link rel="canonical" href="https://purposeful-living-final.vercel.app/">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://purposeful-living-final.vercel.app">
+  <meta property="og:title" content="Purposeful Living ◆ E-book by Samuel Victor Obembe">
+  <meta property="og:description" content="Discover your divine direction and begin living with greater meaning. Get the Purposeful Living e-book for 5,000.">
+  <meta property="og:image" content="https://purposeful-living-final.vercel.app/images/purposeful-living-og.png">
+  <meta property="og:image:width" content="1536">
+  <meta property="og:image:height" content="1024">
+  <meta property="og:image:alt" content="Purposeful Living e-book by Samuel Victor Obembe — Discover your divine direction">
+  <meta property="og:site_name" content="Purposeful Living">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Purposeful Living ◆ E-book by Samuel Victor Obembe">
+  <meta name="twitter:description" content="Discover your divine direction and begin living with greater meaning. Get the Purposeful Living e-book for 5,000.">
+  <meta name="twitter:image" content="https://purposeful-living-final.vercel.app/images/purposeful-living-og.png">
+
+  <!-- Feature Flag and Conditional Styling -->
+  <script>
+    // Feature Flag to toggle physical-book launch functionality
+    const ENABLE_HARDCOPY = false;
+    window.ENABLE_HARDCOPY = ENABLE_HARDCOPY;
+    if (!ENABLE_HARDCOPY) {
+      document.documentElement.classList.add('no-hardcopy');
+    }
+
+    // Dynamic JSON-LD Structured Data
+    const schema = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Book",
+          "@id": "https://purposeful-living-final.vercel.app/#book-schema",
+          "name": "Purposeful Living: Discover Your Divine Direction, Live with Meaning, Fulfil Your Assignment",
+          "author": {
+            "@type": "Person",
+            "name": "Samuel Victor Obembe"
+          },
+          "description": "Discover your divine direction and begin living with greater meaning. Get the Purposeful Living e-book for 5,000.",
+          "image": "https://purposeful-living-final.vercel.app/assets/cover.webp",
+          "url": "https://purposeful-living-final.vercel.app",
+          "workExample": [
+            {
+              "@type": "Book",
+              "bookFormat": "https://schema.org/EBook",
+              "name": "Purposeful Living - E-book",
+              "potentialAction": {
+                "@type": "BuyAction",
+                "target": "https://purposeful-living-final.vercel.app/#order"
+              },
+              "offers": {
+                "@type": "Offer",
+                "price": "5000",
+                "priceCurrency": "NGN",
+                "availability": "https://schema.org/InStock"
+              }
+            }
+          ]
+        },
+        {
+          "@type": "Person",
+          "@id": "https://purposeful-living-final.vercel.app/#author-schema",
+          "name": "Samuel Victor Obembe",
+          "jobTitle": "Pastor, Teacher, and Author",
+          "description": "Samuel Victor Obembe is a pastor in the Redeemed Christian Church of God, a teacher of the Word, and a passionate ambassador of the gospel of Jesus Christ. Author of No More Barrenness, A Minister of God, and Purposeful Living.",
+          "url": "https://purposeful-living-final.vercel.app/#author"
+        }
+      ]
+    };
+
+    if (ENABLE_HARDCOPY) {
+      schema["@graph"][0].workExample.push({
+        "@type": "Book",
+        "bookFormat": "https://schema.org/Hardcover",
+        "name": "Purposeful Living - Signed Physical Hardcopy",
+        "potentialAction": {
+          "@type": "BuyAction",
+          "target": "https://purposeful-living-final.vercel.app/#order"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "10000",
+          "priceCurrency": "NGN",
+          "availability": "https://schema.org/InStock"
+        }
+      });
+    }
+
+    // Inject JSON-LD schema
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(schema);
+    document.head.appendChild(script);
+
+    // Swap anchor ID based on feature flag
+    document.addEventListener("DOMContentLoaded", () => {
+      if (ENABLE_HARDCOPY) {
+        const orderPhys = document.getElementById('order-physical');
+        if (orderPhys) orderPhys.id = 'order';
+      } else {
+        const orderEbook = document.getElementById('order-ebook');
+        if (orderEbook) orderEbook.id = 'order';
+      }
+    });
+  </script>
+
+  <script>
+    // Self-contained ebook buy handler — defined in <head> so it exists
+    // before any button is rendered, regardless of script.js load state.
+    function handleEbookClick(e) {
+      if (e) e.preventDefault();
+      try {
+        var modal = document.getElementById('order-modal');
+        if (!modal) { alert('Order form not found. Please refresh the page.'); return false; }
+        var field = document.getElementById('field-product-code');
+        if (field) field.value = 'PURPOSEFUL_LIVING_EBOOK';
+        var kicker = document.getElementById('modal-kicker');
+        if (kicker) kicker.textContent = 'Order request';
+        var productLabel = document.getElementById('modal-product');
+        if (productLabel) productLabel.textContent = 'Purposeful Living E-book';
+        var physFields = document.getElementById('physical-fields');
+        if (physFields) physFields.style.display = 'none';
+        var submitBtn = document.getElementById('order-submit-btn');
+        if (submitBtn) submitBtn.innerHTML = 'Continue to Payment <span>\u2192</span>';
+        var form = document.getElementById('order-form');
+        if (form) form.dataset.mode = 'order';
+        var errEl = document.getElementById('form-error');
+        if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+      return false;
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css?v=2.0.0">
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="announcement physical-only"><span>◆</span> Signed launch copies now available — includes personal inscription &amp;
+    premium bookmark</div>
+  <div class="announcement ebook-only"><span>◆</span> The Purposeful Living e-book is now available — get your copy today!</div>
+  <header class="site-header" id="top">
+    <div class="container nav-row">
+      <a class="brand" href="#top" aria-label="Purposeful Living home"><span>PURPOSEFUL</span><span>LIVING</span></a>
+      <button class="menu-toggle" aria-controls="primary-nav" aria-expanded="false"><i></i><i></i><i></i><b
+          class="sr-only">Menu</b></button>
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary navigation">
+        <a href="#book">The Book</a><a href="#inside">Inside the Book</a><a href="#author">The Author</a><a
+          href="#books">More Books</a><a href="#faq">FAQs</a>
+        <a class="nav-cta physical-only" href="#order">Order Now</a>
+        <a class="nav-cta ebook-only" href="#order" data-product-code="PURPOSEFUL_LIVING_EBOOK" data-mode="order" onclick="return handleEbookClick(event)">Buy the E-book</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero hero-full" id="book">
+      <picture class="hero-media" aria-hidden="true">
+        <source media="(max-width: 760px)" srcset="assets/hero-full-mobile.webp">
+        <img src="assets/hero-full-4k.webp" alt="">
+      </picture>
+      <div class="hero-tone" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <div class="hero-copy">
+          <div class="eyebrow">The journey of becoming <i></i> ◆</div>
+          <h1>Discover your<br>divine direction.<br><em>Live with meaning.</em><br><em>Fulfil your assignment.</em></h1>
+          <p class="physical-only">Purposeful Living is a practical and spiritually grounded guide for anyone seeking clarity, direction and a
+            life aligned with God’s purpose.</p>
+          <p class="ebook-only">The Purposeful Living e-book is now available. Discover your divine direction and begin living with greater meaning, clarity and intention.</p>
+          <div class="hero-actions">
+            <a class="button primary physical-only" href="#order">Order the Signed Copy <span>→</span></a>
+            <a class="button secondary physical-only" href="#order">Buy the E-book <span>→</span></a>
+            
+            <a class="button primary ebook-only" href="#order" onclick="return handleEbookClick(event)">Buy the E-book <span>→</span></a>
+            <a class="button secondary ebook-only" href="#inside">Discover the Book <span>→</span></a>
+          </div>
+          <div class="hero-benefits physical-only">
+            <div><img src="assets/icon_signed.svg" alt="">Personally Signed</div>
+            <div><span class="pen">✒</span>Custom Inscription</div>
+            <div><img src="assets/icon_bookmark.svg" alt="">Premium Bookmark</div>
+            <div><img src="assets/icon_delivery.svg" alt="">Nationwide Delivery</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="quote-band">
+      <p><b>“</b> Purpose is not invented; it is discovered.</p><span class="diamond-rule"><i></i></span>
+    </section>
+
+    <section class="inside section" id="inside">
+      <div class="container inside-layout">
+        <article class="drift-panel">
+          <div class="drift-image"><img src="assets/river-art.webp" alt="Winding river leading toward a cross"></div>
+          <div class="drift-copy"><span class="kicker">Direction over drift</span>
+            <h2>You were not created to drift.</h2>
+            <p>Many people go through life without clear direction—confused, overwhelmed and unsure of their next step.
+            </p>
+            <p>Purposeful Living helps you rise above the noise, align with God’s will and walk in the life you were
+              created for.</p><a class="button primary small" href="#order">This Book Is for You</a>
+          </div>
+        </article>
+        <div class="chapter-journey">
+          <div class="chapter-heading">
+            <div><span class="kicker">The journey inside</span>
+              <h2>Seventeen chapters of purposeful becoming</h2>
+              <p>Every chapter carries its own visual symbol and advances the reader from discovery to disciplined,
+                practical living.</p>
+            </div>
+            <div class="rail-controls"><button type="button" data-rail-prev
+                aria-label="Previous chapters">←</button><button type="button" data-rail-next
+                aria-label="Next chapters">→</button></div>
+          </div>
+          <div class="chapter-rail" id="chapter-rail">
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_01.webp" alt="Chapter 01 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 01</span>
+                <h3>The Meaning of Purposeful Living</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_02.webp" alt="Chapter 02 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 02</span>
+                <h3>Progress vs Fulfillment</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_03.webp" alt="Chapter 03 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 03</span>
+                <h3>The Compass of Life</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_04.webp" alt="Chapter 04 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 04</span>
+                <h3>Discovering Purpose</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_05.webp" alt="Chapter 05 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 05</span>
+                <h3>The Divine Origin of Purpose</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_06.webp" alt="Chapter 06 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 06</span>
+                <h3>Purpose, Wisdom, and Direction</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_07.webp" alt="Chapter 07 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 07</span>
+                <h3>Intentional Living</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_08.webp" alt="Chapter 08 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 08</span>
+                <h3>Purpose and Relationships</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_09.webp" alt="Chapter 09 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 09</span>
+                <h3>The Power of United Purpose</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_10.webp" alt="Chapter 10 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 10</span>
+                <h3>Purpose and Spiritual Alignment</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_11.webp" alt="Chapter 11 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 11</span>
+                <h3>Purpose Under Pressure</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_12.webp" alt="Chapter 12 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 12</span>
+                <h3>Purpose and Identity</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_13.webp" alt="Chapter 13 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 13</span>
+                <h3>Purpose, Action, and Destiny</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_14.webp" alt="Chapter 14 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 14</span>
+                <h3>Purpose and Eternity</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_15.webp" alt="Chapter 15 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 15</span>
+                <h3>Walking Fully in Purpose</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_16.webp" alt="Chapter 16 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 16</span>
+                <h3>Jesus’ Life Was Driven by Purpose</h3>
+              </div>
+            </article>
+            <article class="chapter-card" tabindex="0">
+              <div class="chapter-art"><img src="assets/chapter_17.webp" alt="Chapter 17 symbol"></div>
+              <div class="chapter-meta"><span>Chapter 17</span>
+                <h3>Purposeful Living and Financial Management</h3>
+              </div>
+            </article>
+          </div>
+          <div class="rail-note"><span>Scroll to explore all 17 chapters</span><i></i></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="look section">
+      <div class="container look-layout">
+        <article class="outcomes"><span class="kicker">More than inspiration.</span>
+          <h2>A clearer way to live.</h2>
+          <ul>
+            <li>Understand your God-given identity</li>
+            <li>Make wiser and more intentional decisions</li>
+            <li>Build relationships that support your assignment</li>
+            <li>Remain aligned under pressure</li>
+            <li>Recognise the difference between activity and purpose</li>
+            <li>Carry what God reveals with discipline and stewardship</li>
+          </ul>
+        </article>
+        <article class="preview-wrap"><span class="kicker">Look inside</span>
+          <h2>Intentional design, from cover to final page</h2>
+          <div class="preview-row">
+            <figure>
+              <div class="preview-page"><img src="assets/preview-title.webp" alt="Title page preview"></div>
+              <figcaption>Title Page</figcaption>
+            </figure>
+            <figure>
+              <div class="preview-page"><img src="assets/preview-contents.webp" alt="Contents preview"></div>
+              <figcaption>Contents</figcaption>
+            </figure>
+            <figure>
+              <div class="preview-page"><img src="assets/preview-chapter.webp" alt="Chapter opening preview"></div>
+              <figcaption>Chapter Opening</figcaption>
+            </figure>
+            <figure>
+              <div class="preview-page"><img src="assets/preview-transition.webp" alt="Transition page preview"></div>
+              <figcaption>Transition Page</figcaption>
+            </figure>
+            <figure>
+              <div class="preview-page"><img src="assets/preview-glossary.webp" alt="Glossary preview"></div>
+              <figcaption>Glossary</figcaption>
+            </figure>
+          </div><button class="button primary preview-open" type="button">Preview Selected Pages <span>→</span></button>
+        </article>
+      </div>
+    </section>
+
+    <section class="personal physical-only">
+      <div class="personal-grid">
+        <div class="personal-image"><img src="assets/signed-bundle.webp"
+            alt="Purposeful Living signed inscription and book presentation"></div>
+        <div class="personal-copy"><span class="kicker gold">A book made personal.</span>
+          <h2>Signed, inscribed and made to be kept.</h2>
+          <p>Each launch copy is personally signed by the author and includes a custom inscription of your choice and a
+            premium, dual-sided bookmark.</p>
+          <blockquote>May you discover your divine direction and walk fully in God’s purpose for your life.<cite>—
+              Samuel Victor Obembe</cite></blockquote>
+        </div>
+        <div class="personal-features">
+          <div><img src="assets/icon_signed.svg" alt=""><b>Personally<br>Signed</b></div>
+          <div><span class="feature-pen">✒</span><b>Custom<br>Inscription</b></div>
+          <div><img src="assets/icon_bookmark.svg" alt=""><b>Premium<br>Bookmark</b></div>
+          <div><img src="assets/icon_gift.svg" alt=""><b>Carefully<br>Packaged</b></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="author section" id="author">
+      <div class="container author-layout">
+        <div class="portrait-space">
+          <img src="assets/author.jpeg" alt="Pastor Samuel Victor Obembe professional portrait">
+        </div>
+        <article class="author-copy">
+          <span class="kicker">About the author</span>
+          <h2>Pastor Samuel Victor Obembe</h2>
+          <div class="author-rule"><i></i></div>
+          <div class="author-bio">
+            <p>Pastor Samuel Victor Obembe is a pastor in the Redeemed Christian Church of God, a teacher of the Word,
+              and a passionate ambassador of the gospel of Jesus Christ. He holds a Master of Arts degree, among other
+              academic qualifications, and is committed to continuous learning, spiritual growth, and the advancement of
+              God’s Kingdom.</p>
+            <p>By the grace of God, his ministry has been a source of blessing to many, particularly through
+              counselling, teaching, and spiritual guidance, bringing encouragement, transformation, and renewed hope to
+              lives. He is deeply passionate about raising young people to discover their God-given purpose and fulfil
+              their divine destinies.</p>
+            <p>He is happily married to Pastor (Mrs.) Yinka Mercy Obembe, and they are blessed with both biological and
+              spiritual children.</p>
+            <p>Pastor Obembe is the author of <em>No More Barrenness</em>, <em>A Minister of God</em>, <em>Purposeful
+                Living</em>, and several other inspiring works dedicated to spiritual growth, faith, and purposeful
+              living.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="books-by-author section" id="books">
+      <div class="container">
+        <div class="books-section-head">
+          <span class="kicker">More from the author</span>
+          <h2>Books for faith, calling and spiritual growth.</h2>
+          <p>Explore two other works by Pastor Samuel Victor Obembe, each written to strengthen faith, clarify spiritual
+            responsibility and encourage purposeful Christian living.</p>
+          <div class="books-rule"><i></i></div>
+        </div>
+
+        <div class="author-books-grid">
+          <article class="author-book-card">
+            <div class="author-book-cover">
+              <img src="assets/no-more-barrenness.webp" alt="No More Barrenness by Pastor Samuel Victor Obembe">
+            </div>
+            <div class="author-book-copy">
+              <span class="book-number">01</span>
+              <h3>No More Barrenness</h3>
+              <p>A faith-building work centred on hope, divine intervention and trusting God beyond seasons of delay and
+                limitation.</p>
+              <a class="book-link" href="#contact">Enquire about this book <span>→</span></a>
+            </div>
+          </article>
+
+          <article class="author-book-card">
+            <div class="author-book-cover">
+              <img src="assets/a-minister-of-god.webp" alt="A Minister of God by Pastor Samuel Victor Obembe">
+            </div>
+            <div class="author-book-copy">
+              <span class="book-number">02</span>
+              <h3>A Minister of God</h3>
+              <p>A focused guide to the call, character, discipline and responsibility required of those entrusted with
+                Christian ministry.</p>
+              <a class="book-link" href="#contact">Enquire about this book <span>→</span></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="order section physical-only" id="order-physical">
+      <div class="container">
+        <div class="order-head"><span class="kicker">Begin your journey</span>
+          <h2>Towards purposeful living.</h2>
+          <p>Choose your preferred format.</p>
+        </div>
+        <div class="products">
+          <article class="product featured">
+            <div class="product-art"><img src="assets/cover.webp" alt="Purposeful Living hardcover"></div>
+            <div class="product-copy"><span class="product-tag">Signed physical copy</span>
+              <h3>Premium hardcover edition</h3>
+              <ul>
+                <li>Personally signed</li>
+                <li>Custom inscription</li>
+                <li>Premium bookmark</li>
+                <li>Nationwide delivery</li>
+              </ul><strong>₦10,000</strong><button class="button primary order-btn"
+                data-product="Signed Physical Copy">Order Hard Copy <span>→</span></button>
+            </div>
+          </article>
+          <article class="product">
+            <div class="product-art tablet"><img src="assets/cover.webp" alt="Purposeful Living e-book"></div>
+            <div class="product-copy"><span class="product-tag">E-book</span>
+              <h3>Digital edition</h3>
+              <ul>
+                <li>Secure PDF access</li>
+                <li>Read on any device</li>
+                <li>Delivery after payment</li>
+                <li>Yours to keep</li>
+              </ul><strong>₦5,000</strong><button class="button primary order-btn" data-product="E-book">Buy E-book
+                <span>→</span></button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dedicated E-book section -->
+    <section class="order section ebook-only" id="order-ebook">
+      <div class="container ebook-section-layout">
+        <div class="ebook-section-copy">
+          <span class="kicker">THE DIGITAL EDITION</span>
+          <h2>Begin the journey today.</h2>
+          <p class="ebook-description">Get the complete Purposeful Living e-book — read it on your phone, tablet or computer, wherever life takes you.</p>
+          <ul class="ebook-benefits">
+            <li>Transformative insights</li>
+            <li>Discover your direction</li>
+            <li>Live with intention</li>
+            <li>Yours to keep forever</li>
+          </ul>
+          <div class="ebook-price-cta">
+            <strong class="ebook-price-display">₦5,000</strong>
+            <button class="button primary order-btn" data-product="E-book" data-product-code="PURPOSEFUL_LIVING_EBOOK" onclick="return handleEbookClick(event)">Buy the E-book <span>→</span></button>
+          </div>
+          <p class="ebook-microcopy">Secure payment · Delivery link sent to your inbox instantly after checkout.</p>
+        </div>
+        <div class="ebook-section-image">
+          <img src="/images/purposeful-living-og.png" alt="Purposeful Living e-book displayed on laptop, phone and tablet" width="760" height="506" loading="lazy">
+        </div>
+      </div>
+    </section>
+
+    <section class="faq section" id="faq">
+      <div class="container faq-layout">
+        <div><span class="kicker">Frequently asked questions</span>
+          <h2>Everything you need to know.</h2>
+        </div>
+        <div class="faq-list">
+          <details class="physical-only">
+            <summary>Is every physical copy signed?</summary>
+            <p>Yes. Every launch copy is personally signed and may include the recipient’s name or a short inscription
+              request.</p>
+          </details>
+          <details class="physical-only">
+            <summary>Can I request a particular inscription?</summary>
+            <p>Yes. A short request can be supplied during checkout.</p>
+          </details>
+          <details class="physical-only">
+            <summary>How long does delivery take?</summary>
+            <p>Delivery timing will depend on the buyer’s location and the confirmed dispatch schedule.</p>
+          </details>
+          <details>
+            <summary>How will I receive the e-book?</summary>
+            <p>An automated email containing your secure, personal download link will be sent to the email address you provided during checkout immediately after payment is confirmed.</p>
+          </details>
+          <details class="ebook-only">
+            <summary>What format is the e-book?</summary>
+            <p>The e-book is delivered as a high-quality PDF, designed to be beautifully readable on digital screens.</p>
+          </details>
+          <details class="ebook-only">
+            <summary>Can I read it on my phone or tablet?</summary>
+            <p>Yes. You can open and read the PDF on any modern smartphone, tablet, e-reader, or computer.</p>
+          </details>
+          <details class="ebook-only">
+            <summary>How long does delivery take after payment?</summary>
+            <p>Delivery is instant. As soon as your payment is processed, our system automatically triggers the delivery email.</p>
+          </details>
+          <details class="ebook-only">
+            <summary>What should I do if I do not receive the email?</summary>
+            <p>First, check your Spam, Junk, or Promotions tab. If it is not there, please contact us at hello@purposefullivingbook.com with your order reference.</p>
+          </details>
+          <details class="ebook-only">
+            <summary>Can I share the download link?</summary>
+            <p>No. Your download link is unique, cryptographically signed, and is linked to your email address. It expires after 48 hours and is limited to a maximum of 5 downloads to prevent unauthorized sharing.</p>
+          </details>
+          <details class="ebook-only">
+            <summary>What happens if my payment is debited but access is not delivered?</summary>
+            <p>Do not worry. Our systems verify transactions automatically. If a network delay occurs, simply email hello@purposefullivingbook.com with your payment reference, and our support team will resolve it for you.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer" id="contact">
+    <div class="container footer-grid">
+      <div><a class="brand light" href="#top"><span>PURPOSEFUL</span><span>LIVING</span></a>
+        <p>Discover your divine direction.<br>Walk in purpose. Leave a legacy.</p>
+      </div>
+      <div>
+        <h3>Quick Links</h3><a href="#book">The Book</a><a href="#inside">Inside the Book</a><a href="#author">The
+          Author</a><a href="#faq">FAQs</a>
+      </div>
+      <div>
+        <h3>Customer Care</h3><a href="#" class="physical-only">Delivery Information</a><a href="#">Refund Policy</a><a href="#">Terms &amp;
+          Conditions</a><a href="#">Privacy Policy</a>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <p>hello@purposefullivingbook.com</p>
+        <p>+234 803 674 8000</p>
+        <p>Lagos, Nigeria</p>
+      </div>
+      <div>
+        <h3>Stay Connected</h3>
+        <p>Join the newsletter for launch news and insights.</p>
+        <form class="newsletter"><input type="email" aria-label="Email address" placeholder="Enter your email"><button
+            type="submit">→</button></form>
+      </div>
+    </div>
+  </footer>
+  <div class="mobile-buy">
+    <a href="#order" class="physical-only"><span class="buy-label">Hard Copy</span><span class="buy-price">₦10,000</span></a>
+    <a href="#order" data-product-code="PURPOSEFUL_LIVING_EBOOK" data-mode="order" onclick="return handleEbookClick(event)"><span class="buy-label">E-book</span><span class="buy-price">₦5,000</span></a>
+  </div>
+  <div class="modal" id="preview-modal" aria-hidden="true">
+    <div class="modal-card preview-modal-card"><button class="modal-close" aria-label="Close">×</button>
+      <div class="modal-preview-grid"><img src="assets/preview-title.webp" alt="Title page"><img
+          src="assets/preview-contents.webp" alt="Contents"><img src="assets/preview-chapter.webp"
+          alt="Chapter opening"><img src="assets/preview-transition.webp" alt="Transition page"></div>
+    </div>
+  </div>
+  <div class="modal" id="order-modal" aria-hidden="true">
+    <div class="modal-card order-modal-card">
+      <button class="modal-close" aria-label="Close">×</button>
+      <span class="kicker" id="modal-kicker">Order request</span>
+      <h2 id="modal-product">Purposeful Living</h2>
+      <form id="order-form" novalidate>
+        <input type="hidden" id="field-product-code" name="productCode">
+        <label>Full name<input required type="text" id="field-name" name="customerName" autocomplete="name"></label>
+        <label>Email address<input required type="email" id="field-email" name="email" autocomplete="email"></label>
+        <label>Phone number<input required type="tel" id="field-phone" name="phone" autocomplete="tel"></label>
+        <div id="physical-fields" class="physical-only">
+          <label>Delivery address<textarea id="field-address" name="deliveryAddress" rows="3"></textarea></label>
+          <label>State<input type="text" id="field-state" name="deliveryState" placeholder="e.g. Lagos"></label>
+          <label>Recipient name (if different)<input type="text" id="field-recipient" name="recipientName" autocomplete="off"></label>
+          <label>Inscription request<textarea id="field-inscription" name="inscriptionRequest" rows="2" placeholder="Optional — e.g. To John, with love"></textarea></label>
+        </div>
+        <div id="form-error" style="color:#c53030;font-size:13px;margin-top:4px;display:none"></div>
+        <button class="button primary" type="submit" id="order-submit-btn">Continue to Payment <span>→</span></button>
+      </form>
+    </div>
+  </div>
+  <script src="script.js?v=2.0.0"></script>
+</body>
+
+</html>

@@ -1,0 +1,57 @@
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { z } from 'zod';
+import { withMethods, checkRateLimit, getClientIp } from '../../../lib/api-handler';
+import { getOrderByReference } from '../../../lib/db/queries/orders';
+import { updateOrderPaymentInit } from '../../../lib/db/queries/orders';
+import { monnifyGateway } from '../../../lib/payments/monnify';
+import { config } from '../../../lib/config';
+import { ValidationError, PaymentError } from '../../../lib/errors';
+import { logger } from '../../../lib/logger';
+
+const InitSchema = z.object({
+  orderReference: z.string().min(1),
+});
+
+export default withMethods({
+  POST: async (req: VercelRequest, res: VercelResponse) => {
+    checkRateLimit(`payinit:${getClientIp(req)}`, 10, 60_000);
+
+    const parsed = InitSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ValidationError('orderReference is required.');
+    }
+
+    const order = await getOrderByReference(parsed.data.orderReference);
+
+    if (order.payment_status === 'PAID') {
+      throw new PaymentError('This order has already been paid.');
+    }
+    if (order.payment_status === 'CANCELLED') {
+      throw new PaymentError('This order has been cancelled.');
+    }
+
+    let result;
+    try {
+      result = await monnifyGateway.initializePayment({
+        orderReference: order.order_reference,
+        amountKobo:     order.total_amount_kobo,
+        currency:       order.currency,
+        customerName:   order.customer_name,
+        customerEmail:  order.email,
+        description:    `Purposeful Living — ${order.order_reference}`,
+        redirectUrl:    config.MONNIFY_REDIRECT_URL,
+      });
+    } catch (err) {
+      logger.error('Monnify init failed', { error: err instanceof Error ? err.message : String(err) });
+      throw new PaymentError('Payment initialisation failed. Please try again.');
+    }
+
+    await updateOrderPaymentInit(order.id, 'monnify', result.gatewayReference);
+
+    res.status(200).json({
+      checkoutUrl:      result.checkoutUrl,
+      gatewayReference: result.gatewayReference,
+      orderReference:   order.order_reference,
+    });
+  },
+});

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Order Status — Purposeful Living</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <style>
+    :root{--navy:#10283F;--gold:#B88A43;--ivory:#F7F1E7;--mid:#091B2C;--cream:#FCF9F3;--serif:Garamond,"EB Garamond",Georgia,serif;--sans:Inter,Arial,sans-serif}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--serif);background:var(--ivory);color:#2B2A28;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px}
+    .brand{font:600 20px/.8 var(--serif);color:var(--navy);margin-bottom:48px;letter-spacing:.01em}
+    .brand span{color:var(--gold)}
+    .card{background:var(--cream);border:1px solid rgba(16,40,63,.1);padding:48px 40px;max-width:480px;width:100%;text-align:center}
+    .icon{font-size:48px;margin-bottom:20px}
+    h1{font:600 28px/1.15 var(--serif);color:var(--navy);margin-bottom:12px}
+    p{font-size:15px;line-height:1.6;color:#35495B;margin:10px 0}
+    .ref{font:700 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:16px 0}
+    .btn{display:inline-block;margin-top:28px;padding:14px 32px;background:var(--mid);color:#fff;text-decoration:none;font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+    .spinner{width:40px;height:40px;border:3px solid rgba(16,40,63,.15);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:20px auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #state-processing,.state-success,.state-failed,.state-unknown{display:none}
+  </style>
+</head>
+<body>
+  <div class="brand">PURPOSEFUL<span>LIVING</span></div>
+  <div class="card">
+    <!-- Processing -->
+    <div id="state-processing">
+      <div class="spinner"></div>
+      <p>Confirming your payment…</p>
+    </div>
+
+    <!-- Success -->
+    <div id="state-success">
+      <div class="icon">✓</div>
+      <h1>Payment confirmed.</h1>
+      <div class="ref" id="success-ref"></div>
+      <p id="success-msg"></p>
+      <a class="btn" href="/">Return to site</a>
+    </div>
+
+    <!-- Failed -->
+    <div id="state-failed">
+      <div class="icon" style="color:#c53030">✕</div>
+      <h1>Payment not completed.</h1>
+      <p>Your order has not been charged. You can try again or contact us at hello@purposefullivingbook.com</p>
+      <a class="btn" href="/">Return to site</a>
+    </div>
+
+    <!-- Unknown / no reference -->
+    <div id="state-unknown">
+      <h1>Nothing to show.</h1>
+      <p>No order reference found. If you just completed a payment, please check your email for confirmation.</p>
+      <a class="btn" href="/">Return to site</a>
+    </div>
+  </div>
+
+  <script>
+    function show(id) {
+      ['state-processing','state-success','state-failed','state-unknown'].forEach(s => {
+        document.getElementById(s).style.display = s === id ? 'block' : 'none';
+      });
+    }
+
+    async function pollStatus(reference, attempts) {
+      if (attempts <= 0) { show('state-failed'); return; }
+      try {
+        const res = await fetch(`/api/orders/${encodeURIComponent(reference)}/status`);
+        if (!res.ok) { show('state-failed'); return; }
+        const data = await res.json();
+
+        if (data.paymentStatus === 'PAID') {
+          document.getElementById('success-ref').textContent = reference;
+          document.getElementById('success-msg').textContent =
+            data.productFormat === 'EBOOK'
+              ? 'Your e-book download link has been sent to your email address.'
+              : 'Your order has been confirmed. We will prepare and dispatch your signed copy shortly.';
+          show('state-success');
+          return;
+        }
+
+        if (data.paymentStatus === 'FAILED' || data.paymentStatus === 'CANCELLED') {
+          show('state-failed');
+          return;
+        }
+
+        // Still pending — poll again
+        setTimeout(() => pollStatus(reference, attempts - 1), 3000);
+      } catch {
+        setTimeout(() => pollStatus(reference, attempts - 1), 4000);
+      }
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get('paymentReference') || params.get('orderReference') || params.get('ref');
+
+    if (!ref) {
+      show('state-unknown');
+    } else {
+      show('state-processing');
+      pollStatus(ref, 12); // up to ~36 seconds of polling
+    }
+  </script>
+</body>
+</html>
