@@ -2,8 +2,13 @@ import { Resend } from 'resend';
 import { config } from '../config';
 import { logger } from '../logger';
 
-// PENDING: Replace with verified Resend sending domain before go-live
-const resend = new Resend(config.RESEND_API_KEY);
+let resend: Resend | null = null;
+
+function getResendClient(): Resend | null {
+  if (!config.RESEND_API_KEY) return null;
+  resend ??= new Resend(config.RESEND_API_KEY);
+  return resend;
+}
 
 export interface EmailPayload {
   to: string;
@@ -12,8 +17,14 @@ export interface EmailPayload {
 }
 
 export async function sendEmail(payload: EmailPayload): Promise<void> {
+  const client = getResendClient();
+  if (!client) {
+    logger.warn('Email skipped because RESEND_API_KEY is not configured', { subject: payload.subject });
+    return;
+  }
+
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await client.emails.send({
       from: config.RESEND_FROM,
       to: payload.to,
       subject: payload.subject,

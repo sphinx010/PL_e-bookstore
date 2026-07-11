@@ -479,6 +479,11 @@ async function submitOrder(data) {
   console.log('Payment initialization response:', payBody);
   if (!payRes.ok) throw new Error(payBody?.error?.message ?? 'Payment initialisation failed.');
 
+  if (payBody.alreadyPaid && payBody.statusUrl) {
+    window.location.href = payBody.statusUrl;
+    return;
+  }
+
   // Step 3: Redirect to Paystack checkout
   console.log('Redirecting to Paystack checkout:', payBody.checkoutUrl);
   window.location.href = payBody.checkoutUrl;

@@ -40,8 +40,8 @@ export const config = {
   PAYSTACK_PUBLIC_KEY:    optional('PAYSTACK_PUBLIC_KEY', 'pk_test_placeholder'),
   PAYSTACK_SECRET_KEY:    optional('PAYSTACK_SECRET_KEY', 'sk_test_placeholder'),
 
-  // Resend — PENDING: verify sending domain
-  RESEND_API_KEY: requireEnv('RESEND_API_KEY'),
+  // Resend — optional. Direct e-book delivery no longer depends on email.
+  RESEND_API_KEY: optional('RESEND_API_KEY', ''),
   RESEND_FROM:    optional('RESEND_FROM', 'Purposeful Living <orders@purposefullivingbook.com>'),
   ADMIN_EMAIL:    requireEnv('ADMIN_EMAIL'),
 

@@ -14,6 +14,7 @@ const mockMarkPaid       = vi.fn();
 const mockRecordFulfil   = vi.fn();
 const mockUpdateFulfil   = vi.fn();
 const mockCreateEntitlement = vi.fn();
+const mockGetEntitlementByOrderId = vi.fn();
 
 vi.mock('../lib/db/queries/payment-events', () => ({
   recordPaymentEvent: (...a: unknown[]) => mockRecordEvent(...a),
@@ -31,7 +32,8 @@ vi.mock('../lib/db/queries/fulfilment-events', () => ({
   recordFulfilmentEvent: (...a: unknown[]) => mockRecordFulfil(...a),
 }));
 vi.mock('../lib/db/queries/ebook-entitlements', () => ({
-  createEbookEntitlement: (...a: unknown[]) => mockCreateEntitlement(...a),
+  createEbookEntitlement:   (...a: unknown[]) => mockCreateEntitlement(...a),
+  getEntitlementByOrderId:  (...a: unknown[]) => mockGetEntitlementByOrderId(...a),
 }));
 vi.mock('../lib/id', () => ({
   generateDownloadToken: () => 'secure-raw-token-hex-64-chars-long-test-placeholder-ok',
@@ -64,6 +66,7 @@ beforeEach(() => {
   mockRecordFulfil.mockReset();
   mockUpdateFulfil.mockReset();
   mockCreateEntitlement.mockReset();
+  mockGetEntitlementByOrderId.mockReset();
 });
 
 describe('Monnify webhook', () => {

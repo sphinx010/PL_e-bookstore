@@ -4,11 +4,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('../lib/db/client', () => ({ db: { storage: { from: vi.fn() } } }));
 
 const mockGetByTokenHash = vi.fn();
+const mockGetByDownloadUuid = vi.fn();
 const mockIncrement = vi.fn();
 
 vi.mock('../lib/db/queries/ebook-entitlements', () => ({
-  getEntitlementByTokenHash: (...a: unknown[]) => mockGetByTokenHash(...a),
-  incrementDownloadCount:    (...a: unknown[]) => mockIncrement(...a),
+  getEntitlementByTokenHash:    (...a: unknown[]) => mockGetByTokenHash(...a),
+  getEntitlementByDownloadUuid: (...a: unknown[]) => mockGetByDownloadUuid(...a),
+  incrementDownloadCount:       (...a: unknown[]) => mockIncrement(...a),
 }));
 
 function makeEntitlement(overrides: Record<string, unknown> = {}) {
@@ -18,6 +20,7 @@ function makeEntitlement(overrides: Record<string, unknown> = {}) {
     order_id: 'order-uuid-1',
     customer_email: 'buyer@example.com',
     storage_path: 'test-ebook.pdf',
+    download_uuid: '11111111-1111-4111-8111-111111111111',
     download_token_hash: 'hashed-token',
     expires_at: future,
     maximum_downloads: 5,
@@ -31,6 +34,7 @@ function makeEntitlement(overrides: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   mockGetByTokenHash.mockReset();
+  mockGetByDownloadUuid.mockReset();
   mockIncrement.mockReset();
 });
 
@@ -42,6 +46,19 @@ describe('E-book entitlement', () => {
 
     const { authoriseDownload } = await import('../lib/ebooks/entitlement');
     const result = await authoriseDownload('raw-test-token');
+
+    expect(result.storagePath).toBe('test-ebook.pdf');
+    expect(result.entitlementId).toBe('ent-uuid-1');
+    expect(mockIncrement).toHaveBeenCalledWith('ent-uuid-1');
+  });
+
+  it('authorises a valid download UUID and increments counter', async () => {
+    const ent = makeEntitlement();
+    mockGetByDownloadUuid.mockResolvedValue(ent);
+    mockIncrement.mockResolvedValue({ ...ent, download_count: 1 });
+
+    const { authoriseDownloadByUuid } = await import('../lib/ebooks/entitlement');
+    const result = await authoriseDownloadByUuid('11111111-1111-4111-8111-111111111111');
 
     expect(result.storagePath).toBe('test-ebook.pdf');
     expect(result.entitlementId).toBe('ent-uuid-1');

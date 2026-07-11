@@ -5,6 +5,8 @@ import { getOrderByReference } from '../../../lib/db/queries/orders';
 import { updateOrderPaymentInit } from '../../../lib/db/queries/orders';
 import { paystackGateway } from '../../../lib/payments/paystack';
 import { config } from '../../../lib/config';
+import { getProductById } from '../../../lib/db/queries/products';
+import { buildEbookAccessUrl, ensureEbookEntitlement } from '../../../lib/orders/fulfil';
 import { ValidationError, PaymentError } from '../../../lib/errors';
 import { logger } from '../../../lib/logger';
 
@@ -24,6 +26,17 @@ export default withMethods({
     const order = await getOrderByReference(parsed.data.orderReference);
 
     if (order.payment_status === 'PAID') {
+      const product = await getProductById(order.product_id);
+      if (product.format === 'EBOOK') {
+        const entitlement = await ensureEbookEntitlement(order);
+        res.status(200).json({
+          alreadyPaid: true,
+          orderReference: order.order_reference,
+          downloadUrl: buildEbookAccessUrl(entitlement.download_uuid),
+          statusUrl: `${config.APP_URL}/order-confirmation.html?ref=${order.order_reference}`,
+        });
+        return;
+      }
       throw new PaymentError('This order has already been paid.');
     }
     if (order.payment_status === 'CANCELLED') {

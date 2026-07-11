@@ -5,6 +5,7 @@ export interface CreateEntitlementInput {
   order_id: string;
   customer_email: string;
   storage_path: string;
+  download_uuid?: string;
   download_token_hash: string;
   expires_at: string;
   maximum_downloads: number;
@@ -33,6 +34,19 @@ export async function getEntitlementByTokenHash(
     .maybeSingle();
 
   if (error) throw new Error(`Failed to fetch entitlement: ${error.message}`);
+  return data as EbookEntitlement | null;
+}
+
+export async function getEntitlementByDownloadUuid(
+  downloadUuid: string,
+): Promise<EbookEntitlement | null> {
+  const { data, error } = await db
+    .from('ebook_entitlements')
+    .select('*')
+    .eq('download_uuid', downloadUuid)
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to fetch entitlement by download UUID: ${error.message}`);
   return data as EbookEntitlement | null;
 }
 

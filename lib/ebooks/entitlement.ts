@@ -1,9 +1,11 @@
 import { createHash } from 'crypto';
 import { db } from '../db/client';
 import {
+  getEntitlementByDownloadUuid,
   getEntitlementByTokenHash,
   incrementDownloadCount,
 } from '../db/queries/ebook-entitlements';
+import type { EbookEntitlement } from '../db/types';
 import { config } from '../config';
 import { logger } from '../logger';
 import {
@@ -17,17 +19,12 @@ export interface DownloadAuthorisation {
   entitlementId: string;
 }
 
-/**
- * Validates a raw download token and returns the storage path if authorised.
- * Increments the download count atomically.
- * Never returns the stored token hash or the permanent storage URL.
- */
-export async function authoriseDownload(rawToken: string): Promise<DownloadAuthorisation> {
-  const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-  const entitlement = await getEntitlementByTokenHash(tokenHash);
-
+async function authoriseEntitlement(
+  entitlement: EbookEntitlement | null,
+  missingLogMessage: string,
+): Promise<DownloadAuthorisation> {
   if (!entitlement) {
-    logger.warn('Download attempt with unknown token');
+    logger.warn(missingLogMessage);
     throw new NotFoundError('Download link not found or expired.');
   }
 
@@ -54,9 +51,30 @@ export async function authoriseDownload(rawToken: string): Promise<DownloadAutho
   });
 
   return {
-    storagePath:    entitlement.storage_path,
-    entitlementId:  entitlement.id,
+    storagePath:   entitlement.storage_path,
+    entitlementId: entitlement.id,
   };
+}
+
+/**
+ * Validates a raw download token and returns the storage path if authorised.
+ * Increments the download count atomically.
+ * Never returns the stored token hash or the permanent storage URL.
+ */
+export async function authoriseDownload(rawToken: string): Promise<DownloadAuthorisation> {
+  const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+  const entitlement = await getEntitlementByTokenHash(tokenHash);
+
+  return authoriseEntitlement(entitlement, 'Download attempt with unknown token');
+}
+
+/**
+ * Validates the stable post-payment UUID shown on the confirmation page.
+ * The UUID is still a backend entitlement handle, not a permanent storage URL.
+ */
+export async function authoriseDownloadByUuid(downloadUuid: string): Promise<DownloadAuthorisation> {
+  const entitlement = await getEntitlementByDownloadUuid(downloadUuid);
+  return authoriseEntitlement(entitlement, 'Download attempt with unknown UUID');
 }
 
 /**

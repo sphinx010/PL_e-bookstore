@@ -81,6 +81,7 @@ export interface EbookEntitlement {
   order_id: string;
   customer_email: string;
   storage_path: string;
+  download_uuid: string;
   download_token_hash: string;
   expires_at: string;
   maximum_downloads: number;

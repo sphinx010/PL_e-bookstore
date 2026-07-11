@@ -1,18 +1,17 @@
 import { markOrderPaid, updateFulfilmentStatus, getOrderByReference } from '../db/queries/orders';
 import { getProductById } from '../db/queries/products';
-import { recordFulfilmentEvent, getFulfilmentHistory } from '../db/queries/fulfilment-events';
-import { createEbookEntitlement } from '../db/queries/ebook-entitlements';
+import { recordFulfilmentEvent } from '../db/queries/fulfilment-events';
+import { createEbookEntitlement, getEntitlementByOrderId } from '../db/queries/ebook-entitlements';
 import { sendEmail } from '../email/client';
 import { paymentConfirmedPhysicalHtml } from '../email/templates/payment-confirmed-physical';
-import { ebookDeliveryHtml } from '../email/templates/ebook-delivery';
 import { adminNewOrderHtml } from '../email/templates/admin-new-order';
 import { generateDownloadToken } from '../id';
 import { config } from '../config';
 import { logger } from '../logger';
 import { AppError } from '../errors';
-import type { Order, FulfilmentStatus, PHYSICAL_TRANSITIONS, EBOOK_TRANSITIONS } from '../db/types';
+import type { Order, FulfilmentStatus, EbookEntitlement } from '../db/types';
 import { PHYSICAL_TRANSITIONS as physTrans, EBOOK_TRANSITIONS as ebookTrans } from '../db/types';
-import { createHash } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 
 function isTransitionAllowed(
   format: 'PHYSICAL' | 'EBOOK',
@@ -23,8 +22,8 @@ function isTransitionAllowed(
   return (map[from] ?? []).includes(to);
 }
 
-function buildDownloadUrl(rawToken: string): string {
-  return `${config.APP_URL}/api/ebooks/download/${rawToken}`;
+export function buildEbookAccessUrl(downloadUuid: string): string {
+  return `${config.APP_URL}/api/ebooks/access/${downloadUuid}`;
 }
 
 /** Called by the webhook handler after a successful payment is verified. */
@@ -33,13 +32,16 @@ export async function fulfilPaidOrder(
   gatewayReference: string,
 ): Promise<void> {
   const order = await getOrderByReference(orderReference);
+  const product = await getProductById(order.product_id);
 
   if (order.payment_status === 'PAID') {
-    logger.warn('fulfilPaidOrder called on already-paid order — skipping', { orderReference });
+    if (product.format === 'EBOOK') {
+      await ensureEbookEntitlement(order);
+    }
+    logger.warn('fulfilPaidOrder called on already-paid order — skipping payment update', { orderReference });
     return;
   }
 
-  const product = await getProductById(order.product_id);
   const newFulfilment: FulfilmentStatus =
     product.format === 'EBOOK' ? 'ACCESS_PENDING' : 'AWAITING_INSCRIPTION';
 
@@ -55,16 +57,25 @@ export async function fulfilPaidOrder(
   }
 }
 
-async function fulfilEbook(order: Order, gatewayReference: string): Promise<void> {
+export async function ensureEbookEntitlement(order: Order): Promise<EbookEntitlement> {
+  const existing = await getEntitlementByOrderId(order.id);
+  if (existing) {
+    if (order.fulfilment_status !== 'ACCESS_ISSUED') {
+      await updateFulfilmentStatus(order.id, 'ACCESS_ISSUED');
+      await recordFulfilmentEvent(order.id, order.fulfilment_status, 'ACCESS_ISSUED', 'system', 'Existing download access confirmed');
+    }
+    return existing;
+  }
+
   const rawToken = generateDownloadToken();
   const tokenHash = createHash('sha256').update(rawToken).digest('hex');
   const expiresAt = new Date(Date.now() + config.EBOOK_LINK_TTL_SECONDS * 1000).toISOString();
-  const expiresHours = Math.round(config.EBOOK_LINK_TTL_SECONDS / 3600);
 
-  await createEbookEntitlement({
+  const entitlement = await createEbookEntitlement({
     order_id:            order.id,
     customer_email:      order.email,
     storage_path:        config.EBOOK_STORAGE_PATH,
+    download_uuid:       randomUUID(),
     download_token_hash: tokenHash,
     expires_at:          expiresAt,
     maximum_downloads:   config.EBOOK_MAX_DOWNLOADS,
@@ -73,14 +84,18 @@ async function fulfilEbook(order: Order, gatewayReference: string): Promise<void
   await updateFulfilmentStatus(order.id, 'ACCESS_ISSUED');
   await recordFulfilmentEvent(order.id, 'ACCESS_PENDING', 'ACCESS_ISSUED', 'system', 'Download token generated');
 
-  const downloadUrl = buildDownloadUrl(rawToken);
-  sendEmail({
-    to: order.email,
-    subject: 'Your Purposeful Living e-book is ready',
-    html: ebookDeliveryHtml(order, downloadUrl, expiresHours),
-  }).catch(err => logger.error('Failed to send ebook delivery email', { error: String(err) }));
+  logger.info('Ebook entitlement created', { orderId: order.id, entitlementId: entitlement.id });
 
-  logger.info('Ebook entitlement created and delivery email queued', { orderId: order.id });
+  return entitlement;
+}
+
+async function fulfilEbook(order: Order, gatewayReference: string): Promise<void> {
+  const entitlement = await ensureEbookEntitlement(order);
+  logger.info('Ebook direct download access ready', {
+    orderId: order.id,
+    gatewayReference,
+    entitlementId: entitlement.id,
+  });
 }
 
 async function fulfilPhysical(order: Order, productName: string): Promise<void> {

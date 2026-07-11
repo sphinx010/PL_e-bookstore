@@ -559,7 +559,7 @@
             <strong class="ebook-price-display">₦5,000</strong>
             <div class="ebook-cta-stack">
               <button class="button primary order-btn" data-product="E-book" data-product-code="PURPOSEFUL_LIVING_EBOOK" onclick="return handleEbookClick(event)">Buy the E-book <span>→</span></button>
-              <span class="ebook-secure-note">Secure download link delivered after confirmed payment.</span>
+              <span class="ebook-secure-note">Secure download unlocks instantly after confirmed payment.</span>
             </div>
           </div>
         </div>
@@ -587,7 +587,7 @@
           </details>
           <details>
             <summary>How will I receive the e-book?</summary>
-            <p>An automated email containing your secure, personal download link will be sent to the email address you provided during checkout immediately after payment is confirmed.</p>
+            <p>After Paystack confirms your payment, the order confirmation page will unlock a secure download button for your copy.</p>
           </details>
           <details class="ebook-only">
             <summary>What format is the e-book?</summary>
@@ -599,15 +599,15 @@
           </details>
           <details class="ebook-only">
             <summary>How long does delivery take after payment?</summary>
-            <p>Delivery is instant. As soon as your payment is processed, our system automatically triggers the delivery email.</p>
+            <p>Delivery is instant after verification. If the webhook is delayed, the confirmation page checks Paystack again and unlocks the download once the backend confirms payment.</p>
           </details>
           <details class="ebook-only">
-            <summary>What should I do if I do not receive the email?</summary>
-            <p>First, check your Spam, Junk, or Promotions tab. If it is not there, please contact us at hello@purposefullivingbook.com with your order reference.</p>
+            <summary>What should I do if the download button does not appear?</summary>
+            <p>Refresh the confirmation page after a moment. If access still does not unlock, contact us at hello@purposefullivingbook.com with your order reference.</p>
           </details>
           <details class="ebook-only">
             <summary>Can I share the download link?</summary>
-            <p>No. Your download link is unique, cryptographically signed, and is linked to your email address. It expires after 48 hours and is limited to a maximum of 5 downloads to prevent unauthorized sharing.</p>
+            <p>No. Your download access is unique to your paid order. The backend checks the entitlement each time and only issues a short-lived Supabase download URL.</p>
           </details>
           <details class="ebook-only">
             <summary>What happens if my payment is debited but access is not delivered?</summary>

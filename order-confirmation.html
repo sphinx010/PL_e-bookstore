@@ -16,7 +16,10 @@
     h1{font:600 28px/1.15 var(--serif);color:var(--navy);margin-bottom:12px}
     p{font-size:15px;line-height:1.6;color:#35495B;margin:10px 0}
     .ref{font:700 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:16px 0}
-    .btn{display:inline-block;margin-top:28px;padding:14px 32px;background:var(--mid);color:#fff;text-decoration:none;font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+    .actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:28px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 28px;background:var(--mid);color:#fff;text-decoration:none;font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase}
+    .btn.secondary{background:transparent;color:var(--navy);border:1px solid rgba(184,138,67,.55)}
+    .download-note{display:none;font:700 10px/1.45 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:rgba(16,40,63,.68);margin-top:14px}
     .spinner{width:40px;height:40px;border:3px solid rgba(16,40,63,.15);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:20px auto}
     @keyframes spin{to{transform:rotate(360deg)}}
     #state-processing,.state-success,.state-failed,.state-unknown{display:none}
@@ -37,7 +40,11 @@
       <h1>Payment confirmed.</h1>
       <div class="ref" id="success-ref"></div>
       <p id="success-msg"></p>
-      <a class="btn" href="/">Return to site</a>
+      <div class="actions">
+        <a class="btn" id="download-btn" href="#" style="display:none">Download e-book</a>
+        <a class="btn secondary" href="/">Return to site</a>
+      </div>
+      <p class="download-note" id="download-note">This secure link belongs to your paid order.</p>
     </div>
 
     <!-- Failed -->
@@ -51,7 +58,7 @@
     <!-- Unknown / no reference -->
     <div id="state-unknown">
       <h1>Nothing to show.</h1>
-      <p>No order reference found. If you just completed a payment, please check your email for confirmation.</p>
+      <p>No order reference found. If you just completed a payment, return through Paystack or contact support with your payment reference.</p>
       <a class="btn" href="/">Return to site</a>
     </div>
   </div>
@@ -72,10 +79,27 @@
 
         if (data.paymentStatus === 'PAID') {
           document.getElementById('success-ref').textContent = reference;
-          document.getElementById('success-msg').textContent =
-            data.productFormat === 'EBOOK'
-              ? 'Your e-book download link has been sent to your email address.'
-              : 'Your order has been confirmed. We will prepare and dispatch your signed copy shortly.';
+          const isEbook = data.productFormat === 'EBOOK';
+          const downloadUrl = data.ebookAccess && data.ebookAccess.downloadUrl;
+          const downloadBtn = document.getElementById('download-btn');
+          const downloadNote = document.getElementById('download-note');
+
+          if (isEbook && !downloadUrl && attempts > 1) {
+            document.getElementById('success-msg').textContent = 'Payment confirmed. Preparing your secure download access...';
+            show('state-success');
+            setTimeout(() => pollStatus(reference, attempts - 1), 2500);
+            return;
+          }
+
+          if (isEbook && downloadUrl) {
+            downloadBtn.href = downloadUrl;
+            downloadBtn.style.display = 'inline-flex';
+            downloadNote.style.display = 'block';
+          }
+
+          document.getElementById('success-msg').textContent = isEbook
+            ? 'Your e-book is ready. Use the download button below to get your copy.'
+            : 'Your order has been confirmed. We will prepare and dispatch your signed copy shortly.';
           show('state-success');
           return;
         }
@@ -93,7 +117,12 @@
     }
 
     const params = new URLSearchParams(window.location.search);
-    const ref = params.get('paymentReference') || params.get('orderReference') || params.get('ref');
+    const ref =
+      params.get('ref') ||
+      params.get('orderReference') ||
+      params.get('paymentReference') ||
+      params.get('reference') ||
+      params.get('trxref');
 
     if (!ref) {
       show('state-unknown');
