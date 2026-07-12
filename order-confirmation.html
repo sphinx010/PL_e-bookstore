@@ -50,9 +50,12 @@
     <!-- Failed -->
     <div id="state-failed">
       <div class="icon" style="color:#c53030">✕</div>
-      <h1>Payment not completed.</h1>
-      <p>Your order has not been charged. You can try again or contact us at hello@purposefullivingbook.com</p>
-      <a class="btn" href="/">Return to site</a>
+      <h1 id="failed-title">Payment not confirmed yet.</h1>
+      <p id="failed-msg">We could not confirm this payment yet. If your bank debited you, do not pay again. Check again in a moment or contact us with your payment reference.</p>
+      <div class="actions">
+        <a class="btn" id="retry-status" href="#">Check again</a>
+        <a class="btn secondary" href="/">Return to site</a>
+      </div>
     </div>
 
     <!-- Unknown / no reference -->
@@ -70,12 +73,58 @@
       });
     }
 
-    async function pollStatus(reference, attempts) {
-      if (attempts <= 0) { show('state-failed'); return; }
+    function setFailed(title, message, reference) {
+      document.getElementById('failed-title').textContent = title;
+      document.getElementById('failed-msg').textContent = message;
+      const retry = document.getElementById('retry-status');
+      retry.onclick = (event) => {
+        event.preventDefault();
+        show('state-processing');
+        pollStatus(reference ? [reference] : getCandidateReferences(), 40);
+      };
+      show('state-failed');
+    }
+
+    function getCandidateReferences() {
+      const params = new URLSearchParams(window.location.search);
+      return [
+        params.get('ref'),
+        params.get('orderReference'),
+        params.get('paymentReference'),
+        params.get('reference'),
+        params.get('trxref')
+      ].filter(Boolean).filter((value, index, values) => values.indexOf(value) === index);
+    }
+
+    async function getStatus(references) {
+      let lastError;
+      for (const reference of references) {
+        try {
+          const res = await fetch(`/api/orders/${encodeURIComponent(reference)}/status`);
+          if (res.ok) {
+            return { data: await res.json(), reference };
+          }
+          lastError = new Error(`Status lookup failed: ${res.status}`);
+        } catch (err) {
+          lastError = err;
+        }
+      }
+      throw lastError || new Error('Status lookup failed');
+    }
+
+    async function pollStatus(references, attempts) {
+      if (attempts <= 0) {
+        setFailed(
+          'Payment still being confirmed.',
+          'Paystack has not confirmed this order to the website yet. If your bank debited you, do not pay again. Use Check again in a moment or contact us with your payment reference.',
+          references[0]
+        );
+        return;
+      }
       try {
-        const res = await fetch(`/api/orders/${encodeURIComponent(reference)}/status`);
-        if (!res.ok) { show('state-failed'); return; }
-        const data = await res.json();
+        const result = await getStatus(references);
+        const data = result.data;
+        const reference = data.orderReference || result.reference;
 
         if (data.paymentStatus === 'PAID') {
           document.getElementById('success-ref').textContent = reference;
@@ -87,7 +136,7 @@
           if (isEbook && !downloadUrl && attempts > 1) {
             document.getElementById('success-msg').textContent = 'Payment confirmed. Preparing your secure download access...';
             show('state-success');
-            setTimeout(() => pollStatus(reference, attempts - 1), 2500);
+            setTimeout(() => pollStatus([reference], attempts - 1), 2500);
             return;
           }
 
@@ -105,30 +154,28 @@
         }
 
         if (data.paymentStatus === 'FAILED' || data.paymentStatus === 'CANCELLED') {
-          show('state-failed');
+          setFailed(
+            'Payment not completed.',
+            'Paystack has not confirmed a successful payment for this order. If your bank debited you, do not pay again; contact us with your payment reference.',
+            reference
+          );
           return;
         }
 
         // Still pending — poll again
-        setTimeout(() => pollStatus(reference, attempts - 1), 3000);
+        setTimeout(() => pollStatus([reference], attempts - 1), 3000);
       } catch {
-        setTimeout(() => pollStatus(reference, attempts - 1), 4000);
+        setTimeout(() => pollStatus(references, attempts - 1), 4000);
       }
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const ref =
-      params.get('ref') ||
-      params.get('orderReference') ||
-      params.get('paymentReference') ||
-      params.get('reference') ||
-      params.get('trxref');
+    const refs = getCandidateReferences();
 
-    if (!ref) {
+    if (!refs.length) {
       show('state-unknown');
     } else {
       show('state-processing');
-      pollStatus(ref, 12); // up to ~36 seconds of polling
+      pollStatus(refs, 40); // up to roughly 2 minutes of polling
     }
   </script>
 </body>

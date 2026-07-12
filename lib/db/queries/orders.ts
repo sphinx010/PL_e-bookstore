@@ -43,6 +43,17 @@ export async function getOrderByReference(reference: string): Promise<Order> {
   return data as Order;
 }
 
+export async function getOrderByGatewayReference(reference: string): Promise<Order | null> {
+  const { data, error } = await db
+    .from('orders')
+    .select('*')
+    .eq('gateway_reference', reference)
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to get order by gateway reference: ${error.message}`);
+  return data ? data as Order : null;
+}
+
 export async function updateOrderPaymentInit(
   orderId: string,
   gateway: string,

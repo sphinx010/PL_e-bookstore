@@ -1,16 +1,48 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withMethods, checkRateLimit, getClientIp } from '../../../lib/api-handler';
-import { getOrderByReference } from '../../../lib/db/queries/orders';
+import { getOrderByGatewayReference, getOrderByReference } from '../../../lib/db/queries/orders';
 import { getProductById } from '../../../lib/db/queries/products';
 import { getEntitlementByOrderId } from '../../../lib/db/queries/ebook-entitlements';
 import { buildEbookAccessUrl, ensureEbookEntitlement, fulfilPaidOrder } from '../../../lib/orders/fulfil';
 import { paystackGateway } from '../../../lib/payments/paystack';
 import { logger } from '../../../lib/logger';
 import type { Order } from '../../../lib/db/types';
+import { NotFoundError } from '../../../lib/errors';
+
+async function getOrderForStatus(reference: string): Promise<Order> {
+  try {
+    return await getOrderByReference(reference);
+  } catch (err) {
+    if (!(err instanceof NotFoundError)) throw err;
+  }
+
+  const byGatewayReference = await getOrderByGatewayReference(reference);
+  if (byGatewayReference) return byGatewayReference;
+
+  try {
+    const verified = await paystackGateway.verifyTransaction(reference);
+
+    try {
+      return await getOrderByReference(verified.orderReference);
+    } catch (err) {
+      if (!(err instanceof NotFoundError)) throw err;
+    }
+
+    const order = await getOrderByGatewayReference(verified.gatewayReference);
+    if (order) return order;
+  } catch (err) {
+    logger.warn('Paystack reference lookup skipped', {
+      reference,
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
+
+  throw new NotFoundError(`Order not found: ${reference}`);
+}
 
 async function reconcilePaystackPayment(order: Order): Promise<Order> {
   if (order.payment_status === 'PAID') return order;
-  if (order.gateway !== 'paystack') return order;
+  if (order.gateway && order.gateway !== 'paystack') return order;
 
   const gatewayReference = order.gateway_reference ?? order.order_reference;
 
@@ -27,7 +59,7 @@ async function reconcilePaystackPayment(order: Order): Promise<Order> {
       return order;
     }
 
-    if (verified.amountKobo !== order.total_amount_kobo || verified.currency !== order.currency) {
+    if (verified.amountKobo !== order.total_amount_kobo || verified.currency.toUpperCase() !== order.currency.toUpperCase()) {
       logger.error('Paystack status reconciliation amount/currency mismatch', {
         orderReference: order.order_reference,
         expectedAmount: order.total_amount_kobo,
@@ -53,9 +85,14 @@ export default withMethods({
   GET: async (req: VercelRequest, res: VercelResponse) => {
     checkRateLimit(`status:${getClientIp(req)}`, 30, 60_000);
 
-    const reference = req.query['reference'] as string;
+    const referenceParam = req.query['reference'];
+    const reference = Array.isArray(referenceParam) ? referenceParam[0] : referenceParam;
 
-    let order = await getOrderByReference(reference);
+    if (!reference) {
+      throw new NotFoundError('Order reference is required.');
+    }
+
+    let order = await getOrderForStatus(reference);
     order = await reconcilePaystackPayment(order);
 
     const product = await getProductById(order.product_id);

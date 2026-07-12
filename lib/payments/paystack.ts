@@ -32,7 +32,21 @@ interface PaystackVerifyResponse {
     gateway_response: string;
     paid_at?: string;
     currency: string;
+    metadata?: Record<string, unknown>;
   };
+}
+
+function extractOrderReference(data: Record<string, unknown>, fallback: string): string {
+  const metadata = data['metadata'];
+  if (metadata && typeof metadata === 'object' && !Array.isArray(metadata)) {
+    const meta = metadata as Record<string, unknown>;
+    const fromCamel = meta['orderReference'];
+    const fromSnake = meta['order_reference'];
+    if (typeof fromCamel === 'string' && fromCamel.trim()) return fromCamel;
+    if (typeof fromSnake === 'string' && fromSnake.trim()) return fromSnake;
+  }
+
+  return fallback;
 }
 
 export class PaystackPaymentGateway implements PaymentGateway {
@@ -45,6 +59,7 @@ export class PaystackPaymentGateway implements PaymentGateway {
       reference:    input.orderReference,
       callback_url: input.redirectUrl,
       metadata: {
+        orderReference: input.orderReference,
         customerName: input.customerName,
         description:  input.description,
       },
@@ -99,9 +114,13 @@ export class PaystackPaymentGateway implements PaymentGateway {
     }
 
     const d = resBody.data;
+    const orderReference = extractOrderReference(
+      d as unknown as Record<string, unknown>,
+      d.reference,
+    );
 
     return {
-      orderReference:   d.reference,
+      orderReference,
       gatewayReference: d.reference,
       amountKobo:       d.amount,
       currency:         d.currency,
@@ -138,11 +157,13 @@ export class PaystackPaymentGateway implements PaymentGateway {
     const data = (p['data'] ?? {}) as Record<string, unknown>;
 
     const isSuccess = event === 'charge.success';
+    const gatewayReference = String(data['reference'] ?? '');
+    const orderReference = extractOrderReference(data, gatewayReference);
 
     return {
       type:             isSuccess ? 'PAYMENT_SUCCESS' : event.startsWith('charge.') ? 'PAYMENT_FAILURE' : 'OTHER',
-      orderReference:   String(data['reference'] ?? ''),
-      gatewayReference: String(data['reference'] ?? ''),
+      orderReference,
+      gatewayReference,
       gatewayEventId:   String(data['id'] ?? event),
       amountKobo:       Number(data['amount'] ?? 0),
       currency:         String(data['currency'] ?? 'NGN'),
